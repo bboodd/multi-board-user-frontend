@@ -1,12 +1,19 @@
 <template>
   <v-app>
-    <AppHeader />
+    <ErrorBoundary>
+      <AppHeader />
 
-    <v-main>
-      <router-view />
-    </v-main>
+      <Suspense>
+        <v-main>
+          <router-view />
+        </v-main>
+        <template #fallback>
+          <SpinnerLoading />
+        </template>
+      </Suspense>
 
-    <AppFooter />
+      <AppFooter />
+    </ErrorBoundary>
   </v-app>
 </template>
 

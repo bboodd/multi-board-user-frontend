@@ -9,6 +9,8 @@ declare module 'vue' {
   export interface GlobalComponents {
     AppFooter: typeof import('./src/components/common/AppFooter.vue')['default']
     AppHeader: typeof import('./src/components/common/AppHeader.vue')['default']
+    ErrorBoundary: typeof import('./src/components/error/ErrorBoundary.vue')['default']
+    ErrorFallBack: typeof import('./src/components/error/ErrorFallBack.vue')['default']
     HelloWorld: typeof import('./src/components/common/HelloWorld.vue')['default']
     PostComment: typeof import('./src/components/post/PostComment.vue')['default']
     PostDetail: typeof import('./src/components/post/PostDetail.vue')['default']
@@ -18,5 +20,6 @@ declare module 'vue' {
     PostWrite: typeof import('./src/components/post/PostWrite.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
+    SpinnerLoading: typeof import('./src/components/loading/SpinnerLoading.vue')['default']
   }
 }
