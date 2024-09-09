@@ -1,5 +1,5 @@
 <template>
   <div>
-    <h1>write 페이지</h1>
+    <h1>free write 페이지</h1>
   </div>
 </template>

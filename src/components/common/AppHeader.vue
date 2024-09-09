@@ -32,9 +32,24 @@
         <router-link to="/ask"> 문의 게시판 </router-link>
 
         <v-spacer></v-spacer>
-        <v-btn @click="loginPage">
-          <span>로그인 / 회원가입</span>
-        </v-btn>
+
+        <div v-if="!nickname" flat>
+          <v-btn right @click="loginBtn">
+            <span>로그인 / 회원가입</span>
+            <v-icon icon="mdi-login-variant" right />
+          </v-btn>
+        </div>
+
+        <div v-else flat style="margin-top: 20px">
+          <v-toolbar-title style="float: left; font-size: 20px">
+            <span>{{ nickname }}님 안녕하세요</span>
+          </v-toolbar-title>
+          <!-- <v-spacer></v-spacer> -->
+          <v-btn flat @click="logoutBtn">
+            <span style="margin-bottom: 7px"></span>
+            <v-icon icon="mdi-logout-variant" right />
+          </v-btn>
+        </div>
       </v-toolbar>
     </nav>
   </header>
@@ -43,11 +58,21 @@
 
 <script setup>
 import { useRouter } from 'vue-router';
+import { useAuthStore } from '@/stores/auth.store';
+import { storeToRefs } from 'pinia';
+
+const authStore = useAuthStore();
+
+const { nickname } = storeToRefs(authStore);
 
 const router = useRouter();
 
-const loginPage = () => {
+const loginBtn = () => {
   router.push({ path: '/login' });
+};
+
+const logoutBtn = () => {
+  authStore.logout();
 };
 </script>
 

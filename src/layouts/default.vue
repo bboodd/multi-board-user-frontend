@@ -8,7 +8,7 @@
           <router-view />
         </v-main>
         <template #fallback>
-          <SpinnerLoading />
+          <LoadingSpinner />
         </template>
       </Suspense>
 
