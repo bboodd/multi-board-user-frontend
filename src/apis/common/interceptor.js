@@ -1,7 +1,16 @@
+import router from '@/router';
+import { useAuthStore } from '@/stores/auth.store';
+import axios from 'axios';
+
 export const setInterceptors = axiosService => {
   axiosService.interceptors.request.use(
     // 요청 보내기 전
     config => {
+      const { accessToken } = useAuthStore();
+
+      if (accessToken) {
+        config.headers.Authorization = `Bearer ${accessToken}`;
+      }
       return config;
     },
     error => {
@@ -20,20 +29,38 @@ export const setInterceptors = axiosService => {
     error => {
       console.log('ERROR >>>', error.response.data);
       const originalRequest = error.config;
-      console.log(originalRequest);
+      const { refreshToken, updateAccessToken, logout } = useAuthStore();
 
       // 응답이 에러인 경우
       // - 200번대 외의 응답은 여기서 처리
 
-      // if (error.response.status === 400) {
-      //   alert(error.response.data.message);
-      // }
-      // if (error.response.status === 404) {
-      //   alert(error.response.data.message);
-      // }
-      // if (error.response.status === 500) {
-      //   alert(error.response.data.error);
-      // }
+      if (error.response.status === 401) {
+        // 리프레시 토큰이 있다면
+        if (refreshToken.length) {
+          axios
+            .post('/api/token/refresh', refreshToken)
+            .then(res => {
+              console.log(res);
+              updateAccessToken(res.data?.data.accessToken);
+              originalRequest.headers.Authorization = `Bearer ${res.data.data.accessToken}`;
+              return axiosService(originalRequest);
+            })
+            .catch(error => {
+              alert('다시 로그인 해 주세요.');
+              logout();
+              router.push('/');
+              return Promise.reject(error);
+            });
+        } else {
+          // 리프레시 토큰이 없다면
+          router.push('/');
+        }
+      }
+
+      if ([400, 404, 500].includes(error.response.status)) {
+        alert(error.response.data.message);
+        return Promise.reject(error);
+      }
 
       return Promise.reject(error);
     }

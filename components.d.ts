@@ -7,9 +7,14 @@ export {}
 /* prettier-ignore */
 declare module 'vue' {
   export interface GlobalComponents {
+    AccountLogin: typeof import('./src/components/account/AccountLogin.vue')['default']
+    AccountSignup: typeof import('./src/components/account/AccountSignup.vue')['default']
     AppFooter: typeof import('./src/components/common/AppFooter.vue')['default']
     AppHeader: typeof import('./src/components/common/AppHeader.vue')['default']
+    ErrorBoundary: typeof import('./src/components/error/ErrorBoundary.vue')['default']
+    ErrorFallBack: typeof import('./src/components/error/ErrorFallBack.vue')['default']
     HelloWorld: typeof import('./src/components/common/HelloWorld.vue')['default']
+    LoadingSpinner: typeof import('./src/components/loading/LoadingSpinner.vue')['default']
     PostComment: typeof import('./src/components/post/PostComment.vue')['default']
     PostDetail: typeof import('./src/components/post/PostDetail.vue')['default']
     PostList: typeof import('./src/components/post/PostList.vue')['default']
