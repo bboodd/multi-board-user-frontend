@@ -1,6 +1,6 @@
 <template>
-  <v-sheet class="pa-12" rounded>
-    <v-card class="mx-auto px-6 py-8" :elevation="12" max-width="50%">
+  <v-sheet class="pa-16" rounded>
+    <v-card class="mx-auto px-6 py-8" :elevation="12" max-width="40%">
       <v-form v-model="valid" validate-on="blur" @submit.prevent="submit">
         <v-text-field
           v-model="signupRequest.loginId"
@@ -174,24 +174,4 @@ const loginIdDuplicateCheck = async e => {
 const passwordEqualsCheck = checkPassword => {
   return signupRequest.value.password === checkPassword;
 };
-
-/**
- * 나중에 쓸 watch 함수 예제
- */
-// watch(
-//   () => signupRequest.value.loginId,
-//   value => {
-//     loginIdAlredyExists.value = ['아이디 중복 확인중...'];
-//     const checkDuplicateRequest = ref({
-//       loginId: value,
-//     });
-//     const res = checkDuplicate(checkDuplicateRequest.value);
-//     if (value !== signupRequest.value.loginId) return;
-//     if (res.message === 'Not Duplicate') {
-//       loginIdAlredyExists.value = [];
-//     } else {
-//       loginIdAlredyExists.value = ['중복된 아이디 입니다.'];
-//     }
-//   }
-// );
 </script>
