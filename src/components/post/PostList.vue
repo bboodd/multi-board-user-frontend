@@ -1,7 +1,6 @@
 <template>
   <v-sheet class="pa-16">
     <v-data-table
-      density="compact"
       :headers="headers"
       hide-default-footer
       item-key="index"

@@ -58,7 +58,6 @@ const loginBtn = () => {
 };
 
 const signupBtn = () => {
-  console.log(1);
   router.push({ path: '/signup' });
 };
 </script>
