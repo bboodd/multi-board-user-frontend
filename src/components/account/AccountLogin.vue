@@ -1,6 +1,6 @@
 <template>
-  <v-sheet class="pa-12" rounded>
-    <v-card class="mx-auto px-6 py-8" :elevation="12" max-width="50%">
+  <v-sheet class="pa-16" rounded>
+    <v-card class="mx-auto px-6 py-8" :elevation="12" max-width="40%">
       <div class="pa-10">
         <h1 class="mb-10" style="text-align: center">로그인</h1>
         <form>
@@ -58,6 +58,6 @@ const loginBtn = () => {
 };
 
 const signupBtn = () => {
-  router.push({ path: 'signup' });
+  router.push({ path: '/signup' });
 };
 </script>
