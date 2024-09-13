@@ -2,6 +2,7 @@
   <PostSearch
     :category-list="categoryList"
     :search-dto="searchDto"
+    @emit-sort="emitSort"
     @search-post="searchPost"
   />
   <PostList
@@ -35,8 +36,8 @@ const searchDto = ref({
   page: 1,
   recordSize: 10,
   pageSize: 10,
-  orderBy: 'created_date',
-  sort: 'DESC',
+  orderBy: 'createdDate',
+  sortBy: 'desc',
 });
 
 const categoryList = ref([]);
@@ -62,6 +63,19 @@ const searchPost = changeSearch => {
  */
 const movePage = changePage => {
   searchDto.value.page = changePage;
+
+  getPosts(searchDto.value).then(res => {
+    postList.value = res.data.listDto;
+    pagination.value = res.data.paginationDto;
+  });
+};
+
+/**
+ * 검색 조건 변경 후 데이터 렌더링 함수
+ * @param sortCondition - 검색 조건 정보
+ */
+const emitSort = sortCondition => {
+  _.assign(searchDto.value, sortCondition);
 
   getPosts(searchDto.value).then(res => {
     postList.value = res.data.listDto;
