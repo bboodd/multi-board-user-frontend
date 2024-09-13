@@ -9,6 +9,11 @@
     :post-list="postList"
     :search-dto="searchDto"
   />
+  <PostPaging
+    :pagination="pagination"
+    :search-dto="searchDto"
+    @move-page="movePage"
+  />
 </template>
 
 <script setup>
@@ -44,6 +49,19 @@ const pagination = ref({});
  */
 const searchPost = changeSearch => {
   _.assign(searchDto.value, changeSearch);
+
+  getPosts(searchDto.value).then(res => {
+    postList.value = res.data.listDto;
+    pagination.value = res.data.paginationDto;
+  });
+};
+
+/**
+ * 페이지 이동 함수
+ * @param changePage - 페이지 번호
+ */
+const movePage = changePage => {
+  searchDto.value.page = changePage;
 
   getPosts(searchDto.value).then(res => {
     postList.value = res.data.listDto;
