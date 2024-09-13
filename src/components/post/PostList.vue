@@ -4,11 +4,13 @@
       :headers="headers"
       hide-default-footer
       item-key="index"
-      :items="postsWithIndex"
+      :items="postListWithIndex"
     >
       <template #top>
         <v-toolbar flat>
-          <v-toolbar-title class="text-left">자유 게시판</v-toolbar-title>
+          <v-toolbar-title class="text-left"
+            >총 {{ props.pagination?.totalRecordCount ?? 0 }}건</v-toolbar-title
+          >
         </v-toolbar>
       </template>
 
@@ -24,36 +26,33 @@
           <td style="padding-right: 35px">{{ item.nickname }}</td>
         </tr>
       </template>
-
-      <template #item.action="{ item }">
-        <v-icon @click="editItem(item)">mdi-pencil</v-icon>
-        <v-icon @click="deleteItem(item)">mdi-delete</v-icon>
-      </template>
-
-      <template #footer>
-        <v-pagination
-          v-model="pagination.page"
-          circle
-          :length="pagination.pages"
-        ></v-pagination>
-      </template>
     </v-data-table>
   </v-sheet>
 </template>
 
 <script setup>
 import { formatDate } from '@/utils/formater';
-import { getPosts } from '@/apis/free/freePostService';
 
-const searchDto = {
-  startDate: '',
-  endDate: '',
-  categoryId: 2,
-  keyword: '',
-  page: 0,
-  recordSize: 0,
-  pageSize: 0,
-};
+const props = defineProps({
+  searchDto: {
+    type: Object,
+    default: () => {
+      return {};
+    },
+  },
+  postList: {
+    type: Array,
+    default: () => {
+      return [];
+    },
+  },
+  pagination: {
+    type: Object,
+    default: () => {
+      return {};
+    },
+  },
+});
 
 const headers = [
   { title: '번호', align: 'start', width: '5%', key: 'index' },
@@ -63,42 +62,17 @@ const headers = [
   { title: '등록일시', align: 'center', width: '10%', key: 'createdDate' },
   { title: '등록자', align: 'center', width: '10%', key: 'nickname' },
 ];
-const posts = ref([]);
-const pagination = ref({});
-const postsWithIndex = computed(() => {
-  return posts.value.map((posts, index) => ({
-    ...posts,
+
+const postListWithIndex = computed(() => {
+  return props.postList.map((postList, index) => ({
+    ...postList,
     index:
-      pagination.value.totalRecordCount -
-      (searchDto.page - 1) * searchDto.pageSize -
+      props.pagination.totalRecordCount -
+      (props.searchDto.page - 1) * props.searchDto.pageSize -
       index,
   }));
 });
 
-onMounted(() => {
-  getPosts(searchDto).then(res => {
-    posts.value = res.data.listDto;
-    pagination.value = res.data.paginationDto;
-  });
-});
-
-/**
- * 나중에 쓸 watch 함수 예제
- */
-// watch(
-//   () => signupRequest.value.loginId,
-//   value => {
-//     loginIdAlredyExists.value = ['아이디 중복 확인중...'];
-//     const checkDuplicateRequest = ref({
-//       loginId: value,
-//     });
-//     const res = checkDuplicate(checkDuplicateRequest.value);
-//     if (value !== signupRequest.value.loginId) return;
-//     if (res.message === 'Not Duplicate') {
-//       loginIdAlredyExists.value = [];
-//     } else {
-//       loginIdAlredyExists.value = ['중복된 아이디 입니다.'];
-//     }
-//   }
-// );
+onMounted(() => {});
+onUpdated(() => {});
 </script>

@@ -2,7 +2,9 @@ import { freeAxios } from '..';
 
 // 게시글 리스트 정보 조회
 const getPosts = async searchDto => {
-  const res = await freeAxios.get('/posts', searchDto);
+  const res = await freeAxios.get('/posts', {
+    params: searchDto,
+  });
 
   return res.data;
 };
