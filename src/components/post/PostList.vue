@@ -5,6 +5,7 @@
       hide-default-footer
       item-key="index"
       :items="postListWithIndex"
+      :items-per-page="props.searchDto.recordSize"
       :no-data-text="'검색된 결과가 없습니다.'"
     >
       <template #top>
