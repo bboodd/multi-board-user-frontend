@@ -17,6 +17,7 @@ declare module 'vue' {
     LoadingSpinner: typeof import('./src/components/loading/LoadingSpinner.vue')['default']
     PostComment: typeof import('./src/components/post/PostComment.vue')['default']
     PostDetail: typeof import('./src/components/post/PostDetail.vue')['default']
+    PostFile: typeof import('./src/components/post/PostFile.vue')['default']
     PostList: typeof import('./src/components/post/PostList.vue')['default']
     PostPaging: typeof import('./src/components/post/PostPaging.vue')['default']
     PostSearch: typeof import('./src/components/post/PostSearch.vue')['default']
