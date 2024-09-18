@@ -35,25 +35,24 @@
         >
       </v-col>
     </v-row>
+    <v-row v-for="file in props.fileList" :key="file" class="text-start">
+      <v-col cols="12" md="12">
+        <v-icon class="pr-5" icon="mdi-download" />
+        <span
+          class="clickable-download"
+          @click="
+            downloadFile(props.post.postId, file.fileId, file.originalName)
+          "
+          >{{ file.originalName }}</span
+        >
+      </v-col>
+    </v-row>
   </v-container>
 </template>
 
 <script setup>
 import { formatDate } from '@/utils/formater';
-import { useAuthStore } from '@/stores/auth.store';
-import { storeToRefs } from 'pinia';
-
-const authStore = useAuthStore();
-
-const { nickname } = storeToRefs(authStore);
-
-const updateAndDeleteBtnFlag = computed(() => {
-  if (nickname === post.nickname) {
-    return true;
-  } else {
-    return false;
-  }
-});
+import { downloadFile } from '@/apis/free/freeFileService';
 
 const props = defineProps({
   post: {
@@ -62,17 +61,24 @@ const props = defineProps({
       return {};
     },
   },
+  fileList: {
+    type: Array,
+    default: () => {
+      return [];
+    },
+  },
 });
-
-const listBtn = () => {};
-
-const deleteBtn = () => {};
-
-const updateBtn = () => {};
 
 onMounted(() => {});
 </script>
 
 <style scoped>
-/* Add any additional styles here */
+.clickable-download {
+  cursor: pointer;
+  color: black;
+  text-decoration: underline;
+}
+.clickable-download:hover {
+  color: cornflowerblue;
+}
 </style>

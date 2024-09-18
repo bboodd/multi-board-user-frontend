@@ -5,10 +5,17 @@
     @emit-sort="emitSort"
     @search-post="searchPost"
   />
+  <v-row class="pr-3">
+    <v-spacer></v-spacer>
+    <v-btn class="mr-16" color="primary" size="large" @click="writeBtn"
+      >글 등록</v-btn
+    >
+  </v-row>
   <PostList
     :pagination="pagination"
     :post-list="postList"
     :search-dto="searchDto"
+    @go-detail="goDetail"
   />
   <PostPaging
     :pagination="pagination"
@@ -21,23 +28,28 @@
 import _ from 'lodash';
 import { getCategories } from '@/apis/free/freeCategoryService';
 import { getPosts } from '@/apis/free/freePostService';
+import router from '@/router';
+import { useRoute } from 'vue-router';
 
-const now = ref(new Date());
+const route = useRoute();
+
 const aMonthAgo = computed(() => {
   const date = new Date();
   return new Date(date.setMonth(date.getMonth() - 1));
 });
 
 const searchDto = ref({
-  startDate: aMonthAgo.value,
-  endDate: now.value,
-  categoryId: 0,
-  keyword: '',
-  page: 1,
-  recordSize: 10,
-  pageSize: 10,
-  orderBy: 'createdDate',
-  sortBy: 'desc',
+  startDate: route.query?.startDate
+    ? new Date(route.query.startDate)
+    : aMonthAgo.value,
+  endDate: route.query?.endDate ? new Date(route.query.endDate) : '',
+  categoryId: route.query?.categoryId ? parseInt(route.query.categoryId) : 0,
+  keyword: route.query.keyword ?? '',
+  page: route.query?.page ? parseInt(route.query.page) : 1,
+  recordSize: route.query?.recordSize ? parseInt(route.query.recordSize) : 10,
+  pageSize: route.query?.pageSize ? parseInt(route.query.pageSize) : 10,
+  orderBy: route.query.orderBy ?? 'createdDate',
+  sortBy: route.query.sortBy ?? 'desc',
 });
 
 const categoryList = ref([]);
@@ -81,6 +93,17 @@ const emitSort = sortCondition => {
     postList.value = res.data.listDto;
     pagination.value = res.data.paginationDto;
   });
+};
+
+const goDetail = postId => {
+  router.push({
+    path: `/free/${postId}`,
+    query: searchDto.value,
+  });
+};
+
+const writeBtn = () => {
+  router.push({ path: `/free/write`, query: searchDto.value });
 };
 
 onMounted(() => {

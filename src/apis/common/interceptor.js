@@ -11,6 +11,7 @@ export const setInterceptors = axiosService => {
       if (accessToken) {
         config.headers.Authorization = `Bearer ${accessToken}`;
       }
+      //   console.log(JSON.stringify(config, null, 2));
       return config;
     },
     error => {
@@ -36,7 +37,7 @@ export const setInterceptors = axiosService => {
 
       if (error.response.status === 401) {
         // 리프레시 토큰이 있다면
-        if (refreshToken.length) {
+        if (refreshToken?.length) {
           axios
             .post('/api/token/refresh', refreshToken)
             .then(res => {

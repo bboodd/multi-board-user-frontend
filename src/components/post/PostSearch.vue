@@ -23,7 +23,7 @@
           v-model="selectDate.endDate"
           class="pl-5 pr-5"
           label="종료일"
-          :max="selectDate.endDate"
+          :max="maxDate"
           :min="selectDate.startDate"
           prepend-icon=""
           prepend-inner-icon="$calendar"
@@ -38,7 +38,7 @@
           class="pl-5 pr-5"
           item-title="categoryName"
           item-value="categotyId"
-          :items="props.categoryList"
+          :items="computedCategoryList"
           label="분류"
           return-object
           variant="outlined"
@@ -133,6 +133,12 @@ const emit = defineEmits(['searchPost', 'emitSort']);
 
 const loading = ref(false);
 
+const computedCategoryList = computed(() => {
+  const list = props.categoryList;
+  const allCategory = { categoryId: 0, categoryName: '전체 분류' };
+  list.unshift(allCategory);
+  return list;
+});
 const recordSizeList = ref([10, 20, 30, 40, 50]);
 const orderByList = ref([
   { orderByName: '등록일시', orderBy: 'createdDate' },
@@ -157,6 +163,7 @@ const selectDate = ref({
   startDate: props.searchDto.startDate,
   endDate: props.searchDto.endDate,
 });
+const maxDate = ref(new Date().toDateString());
 const inputKeyword = ref(props.searchDto.keyword);
 const selectRecordSize = ref(props.searchDto.recordSize);
 // 아래의 빈 값은 props변경시 자동으로 기본값 세팅이 안되기 때문에 watchEffect로 감시
@@ -204,7 +211,7 @@ const changeSort = () => {
  * props값 변경 감시
  */
 watchEffect(() => {
-  selectCategory.value = _.find(props.categoryList, obj => {
+  selectCategory.value = _.find(computedCategoryList.value, obj => {
     return obj.categoryId === props.searchDto.categoryId;
   });
   selectOrderBy.value = _.find(orderByList.value, obj => {

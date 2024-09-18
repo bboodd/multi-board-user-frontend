@@ -1,5 +1,5 @@
 <template>
-  <PostDetail :post="post" />
+  <PostDetail :file-list="fileList" :post="post" />
   <v-row class="pa-6">
     <v-col>
       <v-btn
@@ -11,14 +11,16 @@
         >목록</v-btn
       >
       <v-btn
+        v-show="updateAndDeleteBtnFlag"
         class="mr-6"
-        color="blue-grey"
+        color="red"
         size="large"
         width="100"
         @click="deleteBtn"
         >삭제</v-btn
       >
       <v-btn
+        v-show="updateAndDeleteBtnFlag"
         class="mr-6"
         color="blue-grey"
         size="large"
@@ -31,22 +33,16 @@
 </template>
 
 <script setup>
+import { getFileList } from '@/apis/free/freeFileService';
 import { getPost } from '@/apis/free/freePostService';
 import router from '@/router';
 import { useAuthStore } from '@/stores/auth.store';
 import { storeToRefs } from 'pinia';
+import { useRoute } from 'vue-router';
 
 const authStore = useAuthStore();
 
 const { nickname } = storeToRefs(authStore);
-
-const updateAndDeleteBtnFlag = computed(() => {
-  if (nickname === post.value.nickname) {
-    return true;
-  } else {
-    return false;
-  }
-});
 
 const route = useRoute();
 
@@ -54,15 +50,29 @@ const postId = route.params.id;
 
 const post = ref({});
 
-const listBtn = () => {};
+const fileList = ref([]);
+
+const listBtn = () => {
+  router.push({
+    path: `/free`,
+    query: route.query,
+  });
+};
 
 const deleteBtn = () => {};
 
 const updateBtn = () => {};
 
+const updateAndDeleteBtnFlag = computed(() => {
+  return nickname.value === post.value?.nickname;
+});
+
 onMounted(() => {
   getPost(postId).then(res => {
     post.value = res.data;
+  });
+  getFileList(postId).then(res => {
+    fileList.value = res.data;
   });
 });
 </script>
