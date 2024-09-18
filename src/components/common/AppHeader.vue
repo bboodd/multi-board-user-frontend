@@ -41,13 +41,13 @@
         </div>
 
         <div v-else flat style="margin-top: 20px">
-          <v-toolbar-title style="float: left; font-size: 20px">
+          <v-toolbar-title style="float: left; font-size: 15px">
             <span>{{ nickname }}님 안녕하세요</span>
           </v-toolbar-title>
           <!-- <v-spacer></v-spacer> -->
           <v-btn flat @click="logoutBtn">
-            <span style="margin-bottom: 7px"></span>
-            <v-icon icon="mdi-logout-variant" right />
+            <span style="margin-bottom: 7px">로그아웃</span>
+            <v-icon class="mb-2" icon="mdi-logout-variant" right />
           </v-btn>
         </div>
       </v-toolbar>
@@ -57,15 +57,13 @@
 </template>
 
 <script setup>
-import { useRouter } from 'vue-router';
+import router from '@/router';
 import { useAuthStore } from '@/stores/auth.store';
 import { storeToRefs } from 'pinia';
 
 const authStore = useAuthStore();
 
 const { nickname } = storeToRefs(authStore);
-
-const router = useRouter();
 
 const loginBtn = () => {
   router.push({ path: '/login' });
@@ -89,7 +87,7 @@ const logoutBtn = () => {
   margin-right: 3px;
 }
 
-#nav a.router-link-exact-active {
+#nav a.router-link-active {
   color: #42b983;
 }
 </style>

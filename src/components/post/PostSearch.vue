@@ -23,7 +23,7 @@
           v-model="selectDate.endDate"
           class="pl-5 pr-5"
           label="종료일"
-          :max="selectDate.endDate"
+          :max="maxDate"
           :min="selectDate.startDate"
           prepend-icon=""
           prepend-inner-icon="$calendar"
@@ -38,7 +38,7 @@
           class="pl-5 pr-5"
           item-title="categoryName"
           item-value="categotyId"
-          :items="props.categoryList"
+          :items="computedCategoryList"
           label="분류"
           return-object
           variant="outlined"
@@ -72,12 +72,11 @@
       <v-col cols="1" md="1">
         <v-select
           v-model="selectRecordSize"
-          item-title="recordSize"
           item-value="recordSize"
           :items="recordSizeList"
           label="페이지 당"
-          return-object
           variant="outlined"
+          @update:model-value="changeSort"
         ></v-select>
       </v-col>
       <span style="margin-top: 30px">개씩 보기</span>
@@ -93,6 +92,7 @@
           label="기준"
           return-object
           variant="outlined"
+          @update:model-value="changeSort"
         ></v-select>
       </v-col>
       <v-col cols="2" md="2">
@@ -104,6 +104,7 @@
           label="방법"
           return-object
           variant="outlined"
+          @update:model-value="changeSort"
         ></v-select>
       </v-col>
     </v-row>
@@ -128,24 +129,26 @@ const props = defineProps({
   },
 });
 
-const emit = defineEmits(['searchPost']);
+const emit = defineEmits(['searchPost', 'emitSort']);
 
 const loading = ref(false);
 
-const recordSizeList = ref([
-  { recordSize: 10 },
-  { recordSize: 20 },
-  { recordSize: 30 },
-]);
+const computedCategoryList = computed(() => {
+  const list = props.categoryList;
+  const allCategory = { categoryId: 0, categoryName: '전체 분류' };
+  list.unshift(allCategory);
+  return list;
+});
+const recordSizeList = ref([10, 20, 30, 40, 50]);
 const orderByList = ref([
-  { orderByName: '등록일시', orderBy: 'created_date' },
+  { orderByName: '등록일시', orderBy: 'createdDate' },
   { orderByName: '분류', orderBy: 'categoryId' },
   { orderByName: '제목', orderBy: 'title' },
-  { orderByName: '조회수', orderBy: 'view_cnt' },
+  { orderByName: '조회수', orderBy: 'viewCnt' },
 ]);
 const sortList = ref([
-  { sortName: '내림차순', sort: 'DESC' },
-  { sortName: '오름차순', sort: 'ASC' },
+  { sortName: '내림차순', sortBy: 'desc' },
+  { sortName: '오름차순', sortBy: 'asc' },
 ]);
 
 const aYearAgo = computed(() => {
@@ -160,10 +163,11 @@ const selectDate = ref({
   startDate: props.searchDto.startDate,
   endDate: props.searchDto.endDate,
 });
+const maxDate = ref(new Date().toDateString());
 const inputKeyword = ref(props.searchDto.keyword);
+const selectRecordSize = ref(props.searchDto.recordSize);
 // 아래의 빈 값은 props변경시 자동으로 기본값 세팅이 안되기 때문에 watchEffect로 감시
 const selectCategory = ref();
-const selectRecordSize = ref();
 const selectOrderBy = ref();
 const selectSort = ref();
 
@@ -182,29 +186,39 @@ const searchBtn = () => {
     keyword: inputKeyword.value,
     page: props.searchDto.page,
     pageSize: props.searchDto.pageSize,
-    recordSize: selectRecordSize.value.recordSize,
+    recordSize: selectRecordSize.value,
     orderBy: selectOrderBy.value.orderBy,
-    sort: selectSort.value.sort,
+    sortBy: selectSort.value.sortBy,
   });
 
   emit('searchPost', changeSearch.value);
 };
 
 /**
+ * 검색조건 변경 함수
+ */
+const changeSort = () => {
+  const sortCondition = ref({
+    recordSize: selectRecordSize.value,
+    orderBy: selectOrderBy.value.orderBy,
+    sortBy: selectSort.value.sortBy,
+  });
+
+  emit('emitSort', sortCondition.value);
+};
+
+/**
  * props값 변경 감시
  */
 watchEffect(() => {
-  selectCategory.value = _.find(props.categoryList, obj => {
+  selectCategory.value = _.find(computedCategoryList.value, obj => {
     return obj.categoryId === props.searchDto.categoryId;
   });
   selectOrderBy.value = _.find(orderByList.value, obj => {
     return obj.orderBy === props.searchDto.orderBy;
   });
-  selectRecordSize.value = _.find(recordSizeList.value, obj => {
-    return obj.recordSize === props.searchDto.recordSize;
-  });
   selectSort.value = _.find(sortList.value, obj => {
-    return obj.sort === props.searchDto.sort;
+    return obj.sortBy === props.searchDto.sortBy;
   });
 });
 
