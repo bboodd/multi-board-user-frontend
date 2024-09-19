@@ -1,16 +1,16 @@
 <template>
-  <v-container class="pa-16 border-xl" max-width="70%">
+  <v-container class="pa-16 border-md mt-10" max-width="70%">
     <v-row class="border-b-lg border-surface-variant" rows="1">
-      <v-col class="text-right" cols="1" md="1">
+      <v-col class="text-center" cols="1" md="1">
         <span
           ><strong>{{ props.post.categoryName }}</strong></span
         >
       </v-col>
-      <v-col class="text-left" cols="7" md="7">
+      <v-col class="text-left" cols="6" md="6">
         <div>{{ props.post.title }}</div>
       </v-col>
       <v-spacer></v-spacer>
-      <v-col class="text-right" cols="2" md="2">
+      <v-col class="text-right" cols="3" md="3">
         <span>{{ formatDate(props.post.createdDate) }}</span>
         &nbsp;
         <span>{{ props.post.nickname }}</span>
@@ -35,7 +35,7 @@
         >
       </v-col>
     </v-row>
-    <v-row v-for="file in props.fileList" :key="file" class="text-start">
+    <v-row v-for="file in props.fileList" :key="file" class="text-start" dense>
       <v-col cols="12" md="12">
         <v-icon class="pr-5" icon="mdi-download" />
         <span

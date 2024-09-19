@@ -1,5 +1,6 @@
 <template>
   <PostDetail :file-list="fileList" :post="post" />
+  <PostComment :comment-list="commentList" />
   <v-row class="pa-6">
     <v-col>
       <v-btn
@@ -39,6 +40,7 @@ import router from '@/router';
 import { useAuthStore } from '@/stores/auth.store';
 import { storeToRefs } from 'pinia';
 import { useRoute } from 'vue-router';
+import { getCommentList } from '@/apis/free/freeCommentService';
 
 const authStore = useAuthStore();
 
@@ -49,8 +51,8 @@ const route = useRoute();
 const postId = route.params.id;
 
 const post = ref({});
-
 const fileList = ref([]);
+const commentList = ref([]);
 
 const listBtn = () => {
   router.push({
@@ -61,8 +63,16 @@ const listBtn = () => {
 
 const deleteBtn = () => {};
 
-const updateBtn = () => {};
+const updateBtn = () => {
+  router.push({
+    path: `/free/write/${postId}`,
+    query: route.query,
+  });
+};
 
+/**
+ * 수정 및 삭제 버튼 로그인시만 나오게 하는 변수
+ */
 const updateAndDeleteBtnFlag = computed(() => {
   return nickname.value === post.value?.nickname;
 });
@@ -73,6 +83,9 @@ onMounted(() => {
   });
   getFileList(postId).then(res => {
     fileList.value = res.data;
+  });
+  getCommentList(postId).then(res => {
+    commentList.value = res.data;
   });
 });
 </script>

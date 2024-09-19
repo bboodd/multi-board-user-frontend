@@ -10,6 +10,7 @@ import { setupLayouts } from 'virtual:generated-layouts';
 import { routes } from 'vue-router/auto-routes';
 import { useAuthStore } from '@/stores/auth.store';
 import { storeToRefs } from 'pinia';
+import _ from 'lodash';
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -35,12 +36,11 @@ router.isReady().then(() => {
   localStorage.removeItem('vuetify:dynamic-reload');
 });
 
-router.beforeEach(async to => {
+router.beforeEach(to => {
   const authStore = useAuthStore();
-  const { returnUrl, accessToken } = storeToRefs(authStore);
-  const authRequired = await authRequiredCheck(to);
+  const { accessToken } = storeToRefs(authStore);
+  const authRequired = authRequiredCheck(to);
   if (authRequired && !accessToken.value) {
-    returnUrl.value = to.fullPath;
     return '/login';
   }
 });
@@ -60,10 +60,10 @@ const authRequiredCheck = to => {
     '/ask/write/:id',
   ];
   const privateParams = ['my'];
-  const authRequiredBoolean =
+  const required =
     privatePages.includes(to.path) ||
-    privateParams.some(key => Object.keys(to.query).includes(key));
-  return authRequiredBoolean;
+    _.some(privateParams, key => _.has(to.query, key));
+  return required;
 };
 
 export default router;
