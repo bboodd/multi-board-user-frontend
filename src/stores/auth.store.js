@@ -17,7 +17,12 @@ export const useAuthStore = defineStore('auth', () => {
       localStorage.setItem('accessToken', JSON.stringify(accessToken.value));
       localStorage.setItem('nickname', JSON.stringify(nickname.value));
 
-      router.push(returnUrl.value || '/');
+      const previousPage = computed(() => {
+        const lastPath = router.options.history.state.back;
+        return lastPath || '/';
+      });
+
+      router.push(previousPage.value);
     });
   };
 

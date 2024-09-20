@@ -9,24 +9,28 @@
         5개)
       </div>
 
-      <div v-if="props.responseFileList?.length">
-        <div v-for="(file, idx) in props.responseFileList" :key="idx">
-          <v-text-field
-            v-model="file.originalName"
-            class="upload-name"
-            readonly
-          ></v-text-field>
-          <v-btn
-            @click="downloadFile(file.postId, file.fileId, file.originalName)"
-            >다운로드</v-btn
-          >
-          <v-btn
-            append-icon="mdi-close"
-            class="mb-6 ml-5 pl-1"
-            color="red"
-            @click="removeFileBtn(idx, file.fileId)"
-          ></v-btn>
-        </div>
+      <div v-for="(file, idx) in props.responseFileList" :key="idx">
+        <v-text-field
+          v-model="file.originalName"
+          class="upload-name"
+          density="compact"
+          readonly
+          variant="outlined"
+          width="50%"
+        ></v-text-field>
+        <v-btn
+          class="mb-5 ml-5"
+          color="indigo"
+          size="large"
+          @click="downloadFile(file.postId, file.fileId, file.originalName)"
+          >다운로드</v-btn
+        >
+        <v-btn
+          append-icon="mdi-close"
+          class="mb-6 ml-5 pl-1"
+          color="red"
+          @click="removeFileBtn(idx, file.fileId)"
+        ></v-btn>
       </div>
 
       <div v-for="(file, idx) in props.files" :key="idx">
@@ -41,6 +45,7 @@
         ></v-text-field>
         <button class="file-select" @click="selectFileBtn">파일 선택</button>
         <input
+          accept=".jpg, .gif, .png, .zip"
           style="display: none"
           type="file"
           @change="changeFile($event, idx)"
@@ -76,16 +81,28 @@ const props = defineProps({
 
 const emit = defineEmits(['selectFile', 'addFile', 'removeFile']);
 
+/**
+ * 파일 선택 버튼 함수
+ * @param e - event
+ */
 const selectFileBtn = e => {
   e.preventDefault();
   e.target.nextElementSibling.click();
 };
 
+/**
+ * 파일 change 함수
+ * @param e - event
+ * @param idx - index
+ */
 const changeFile = (e, idx) => {
   const file = e.target.files[0];
   emit('selectFile', file, idx);
 };
 
+/**
+ * 파일 추가 버튼 함수
+ */
 const addFileBtn = () => {
   const fileLength = props.files.length + props.responseFileList.length;
   if (fileLength < 5) {
@@ -93,6 +110,11 @@ const addFileBtn = () => {
   }
 };
 
+/**
+ * 파일 삭제 버튼 클릭 함수
+ * @param idx - index
+ * @param fileId - pk
+ */
 const removeFileBtn = (idx, fileId) => {
   emit('removeFile', idx, fileId);
 };

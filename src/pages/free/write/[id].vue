@@ -1,10 +1,5 @@
 <template>
-  <PostWrite
-    :category-list="categoryList"
-    :file-list="fileList"
-    :post="post"
-    :post-id="postId"
-  />
+  <PostWrite :category-list="categoryList" :file-list="fileList" :post="post" />
 </template>
 <script setup>
 import { useRoute } from 'vue-router';

@@ -22,10 +22,28 @@
           <td style="padding-right: 35px">
             {{ item.categoryName }}
           </td>
-          <td class="text-start text-h6">
-            <span class="clickable-title" @click="titleClick(item.postId)">{{
-              item.title
-            }}</span>
+          <td class="text-start text-body-1 clickable-title">
+            <div class="clickable-title">
+              <span @click="titleClick(item.postId)">{{ item.title }}</span>
+              <span
+                v-if="item.commentCnt"
+                class="ml-1"
+                @click="titleClick(item.postId)"
+                >({{ item.commentCnt }})</span
+              >
+              <span
+                v-if="item.newFlag"
+                class="ml-2"
+                @click="titleClick(item.postId)"
+                >new</span
+              >
+              <v-icon
+                v-if="item.fileCnt"
+                icon="mdi-paperclip"
+                size="small"
+                @click="titleClick(item.postId)"
+              ></v-icon>
+            </div>
           </td>
           <!-- <td class="text-start text-h6" @click="goDetail">{{ item.title }}</td> -->
           <td style="padding-right: 35px">{{ item.viewCnt }}</td>
@@ -72,13 +90,20 @@ const headers = [
   { title: '등록자', align: 'center', width: '10%', key: 'nickname' },
 ];
 
+const weekAgo = computed(() => {
+  const date = new Date();
+  return new Date(date.setDate(date.getDate() - 7));
+});
+
 const postListWithIndex = computed(() => {
+  if (!props.postList.length) return;
   return props.postList.map((postList, index) => ({
     ...postList,
     index:
       props.pagination.totalRecordCount -
       (props.searchDto.page - 1) * props.searchDto.pageSize -
       index,
+    newFlag: new Date(props.postList[index].createdDate) > weekAgo.value,
   }));
 });
 

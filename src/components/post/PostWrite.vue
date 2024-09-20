@@ -73,6 +73,8 @@ import { useRoute } from 'vue-router';
 
 const route = useRoute();
 
+const postId = route.params.id;
+
 const props = defineProps({
   categoryList: {
     type: Array,
@@ -91,10 +93,6 @@ const props = defineProps({
     default: () => {
       return [];
     },
-  },
-  postId: {
-    type: Number,
-    default: 0,
   },
 });
 
@@ -129,8 +127,11 @@ const content = useField('content');
 
 const files = ref([{}]);
 const removeFileIds = ref([]);
-const responseFileList = ref(props.fileList);
+const responseFileList = ref([]);
 
+/**
+ * 수정 일시 기본값 세팅 함수
+ */
 watchEffect(() => {
   if (!_.isEmpty(props.post)) {
     category.value.value = _.find(props.categoryList, object => {
@@ -138,27 +139,27 @@ watchEffect(() => {
     });
     title.value.value = props.post.title;
     content.value.value = props.post.content;
+    responseFileList.value = props.fileList;
   }
 });
 
+/**
+ * submit 함수
+ */
 const submit = handleSubmit(values => {
   const formData = new FormData();
+  if (postId) formData.append('postId', postId);
   formData.append('categoryId', values.category.categoryId);
   formData.append('title', values.title);
   formData.append('content', values.content);
   files.value.forEach(file => formData.append('files', file));
   removeFileIds.value.forEach(id => formData.append('removeFileIds', id));
-  //   const requestPost = ref({
-  //     categoryId: values.category.categoryId,
-  //     title: values.title,
-  //     content: values.content,
-  //     files: toRaw(files.value),
-  //     removeFileIds: toRaw(removeFileIds.value),
-  //   });
-  if (props.postId) {
-    updatePost(props.postId, formData).then(() => {
+
+  // 수정 혹은 등록
+  if (postId) {
+    updatePost(postId, formData).then(() => {
       router.push({
-        path: `/free/${props.postId}`,
+        path: `/free/${postId}`,
         query: route.query,
       });
     });
@@ -169,6 +170,11 @@ const submit = handleSubmit(values => {
   }
 });
 
+/**
+ * 파일 선택시 핸들링하는 함수
+ * @param file - 파일 객체
+ * @param idx - 파일리스트 인덱스
+ */
 const selectFile = (file, idx) => {
   if (!file) {
     return false;
@@ -184,10 +190,17 @@ const selectFile = (file, idx) => {
   files.value[idx] = file;
 };
 
+/**
+ * 빈 파일 객체 추가 함수
+ */
 const addFile = () => {
   files.value.push({});
 };
 
+/**
+ * 파일 삭제 id 리스트에 추가하는 함수
+ * @param fileId - 파일 pk
+ */
 const addRemoveFileId = fileId => {
   if (removeFileIds.value.includes(fileId)) {
     return false;
@@ -195,8 +208,12 @@ const addRemoveFileId = fileId => {
   removeFileIds.value.push(fileId);
 };
 
+/**
+ * 파일 삭제 함수
+ * @param idx - 저장된 파일 인덱스
+ * @param fileId - 파일 pk
+ */
 const removeFile = (idx, fileId) => {
-  console.log(idx);
   if (fileId) {
     addRemoveFileId(fileId);
     responseFileList.value.splice(idx, 1);
