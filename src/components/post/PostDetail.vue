@@ -24,35 +24,61 @@
         <span>{{ props.post.viewCnt }}</span>
       </v-col>
     </v-row>
+
+    <v-row v-if="boardType === 'gallery'">
+      <v-carousel>
+        <v-carousel-item
+          v-for="(item, idx) in props.imgUrlList"
+          :key="idx"
+          cover
+          :src="item.src"
+        ></v-carousel-item>
+      </v-carousel>
+    </v-row>
+
     <v-row>
       <v-col cols="12" md="12">
         <v-textarea
           :model-value="props.post.content"
+          :no-resize="true"
           :readonly="true"
-          rows="13"
+          :rows="selectContentRows(boardType)"
           variant="outlined"
           >{{ props.post.content }}</v-textarea
         >
       </v-col>
     </v-row>
-    <v-row v-for="file in props.fileList" :key="file" class="text-start" dense>
-      <v-col cols="12" md="12">
-        <v-icon class="pr-5" icon="mdi-download" />
-        <span
-          class="clickable-download"
-          @click="
-            downloadFile(props.post.postId, file.fileId, file.originalName)
-          "
-          >{{ file.originalName }}</span
-        >
-      </v-col>
-    </v-row>
+
+    <div v-if="boardType === 'free'">
+      <v-row
+        v-for="file in props.fileList"
+        :key="file"
+        class="text-start"
+        dense
+      >
+        <v-col cols="12" md="12">
+          <v-icon class="pr-5" icon="mdi-download" />
+          <span
+            class="clickable-download"
+            @click="
+              downloadFile(props.post.postId, file.fileId, file.originalName)
+            "
+            >{{ file.originalName }}</span
+          >
+        </v-col>
+      </v-row>
+    </div>
   </v-container>
 </template>
 
 <script setup>
 import { formatDate } from '@/utils/formater';
 import { downloadFile } from '@/apis/free/freeFileService';
+import { useRoute } from 'vue-router';
+
+const route = useRoute();
+
+const boardType = route.path.split('/')[1];
 
 const props = defineProps({
   post: {
@@ -67,7 +93,19 @@ const props = defineProps({
       return [];
     },
   },
+  imgUrlList: {
+    // TODO: 파일 로컬에 저장해서 못불러오는거 해결해야함.(서버에서 resource or firebase or s3)?
+    type: Array,
+    default: () => {
+      return [];
+    },
+  },
 });
+
+const selectContentRows = board => {
+  if (board === 'free') return 13;
+  if (board === 'gallery') return 6;
+};
 
 onMounted(() => {});
 </script>
