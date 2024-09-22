@@ -36,12 +36,17 @@ router.isReady().then(() => {
   localStorage.removeItem('vuetify:dynamic-reload');
 });
 
-router.beforeEach(to => {
+// TODO: 이거 붙이면 push 되다 안되다 하는거 해결해야함.
+router.beforeEach(async (to, from, next) => {
+  console.log('from: ', from, 'to: ', to);
   const authStore = useAuthStore();
   const { accessToken } = storeToRefs(authStore);
   const authRequired = authRequiredCheck(to);
   if (authRequired && !accessToken.value) {
-    return '/login';
+    next({ path: '/login' });
+  } else {
+    next();
+    console.log('next call');
   }
 });
 

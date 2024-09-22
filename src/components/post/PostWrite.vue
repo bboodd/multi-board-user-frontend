@@ -51,9 +51,11 @@
         </v-col>
       </v-row>
       <PostFileInput
+        v-if="boardType === 'free' || boardType === 'gallery'"
         :files="files"
         :response-file-list="responseFileList"
         @add-file="addFile"
+        @download-emit="downloadEmit"
         @remove-file="removeFile"
         @select-file="selectFile"
       />
@@ -67,13 +69,13 @@
 <script setup>
 import { useField, useForm } from 'vee-validate';
 import _ from 'lodash';
-import { savePost, updatePost } from '@/apis/free/freePostService';
-import router from '@/router';
 import { useRoute } from 'vue-router';
 
 const route = useRoute();
 
 const postId = route.params.id;
+
+const boardType = route.path.split('/')[1];
 
 const props = defineProps({
   categoryList: {
@@ -95,6 +97,8 @@ const props = defineProps({
     },
   },
 });
+
+const emit = defineEmits('onSave', 'onUpdate', 'download');
 
 const { handleSubmit } = useForm({
   validationSchema: {
@@ -152,21 +156,18 @@ const submit = handleSubmit(values => {
   formData.append('categoryId', values.category.categoryId);
   formData.append('title', values.title);
   formData.append('content', values.content);
-  files.value.forEach(file => formData.append('files', file));
+  files.value.forEach(file => {
+    if (file && file.size > 0) {
+      formData.append('files', file);
+    }
+  });
   removeFileIds.value.forEach(id => formData.append('removeFileIds', id));
 
   // 수정 혹은 등록
   if (postId) {
-    updatePost(postId, formData).then(() => {
-      router.push({
-        path: `/free/${postId}`,
-        query: route.query,
-      });
-    });
+    emit('onUpdate', formData);
   } else {
-    savePost(formData).then(() => {
-      router.push({ path: `/free`, query: route.query });
-    });
+    emit('onSave', formData);
   }
 });
 
@@ -176,17 +177,6 @@ const submit = handleSubmit(values => {
  * @param idx - 파일리스트 인덱스
  */
 const selectFile = (file, idx) => {
-  if (!file) {
-    return false;
-  }
-
-  const fileSize = Math.floor(file.size / 1024 / 1024);
-  if (fileSize > 2) {
-    alert('2MB 이하의 파일을 업로드 해 주세요.');
-    e.target.value = '';
-    return false;
-  }
-
   files.value[idx] = file;
 };
 
@@ -226,6 +216,10 @@ const removeFile = (idx, fileId) => {
   }
 
   files.value.splice(idx, 1);
+};
+
+const downloadEmit = (postId, fileId, originalName) => {
+  emit('download', postId, fileId, originalName);
 };
 </script>
 

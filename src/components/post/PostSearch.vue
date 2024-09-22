@@ -161,7 +161,7 @@ const aYearAgo = computed(() => {
  */
 const selectDate = ref({
   startDate: props.searchDto.startDate,
-  endDate: props.searchDto.endDate,
+  endDate: props.searchDto.endDate || new Date(),
 });
 const maxDate = ref(new Date().toDateString());
 const inputKeyword = ref(props.searchDto.keyword);

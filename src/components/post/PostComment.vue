@@ -99,7 +99,7 @@ const submit = handleSubmit(values => {
     content: values.inputComment,
   });
   saveComment(postId, commentRequest.value).then(() => {
-    router.push({ path: `/free/${props.postId}`, query: route.query });
+    router.push({ path: `/free/${postId}`, query: route.query });
   });
 });
 
