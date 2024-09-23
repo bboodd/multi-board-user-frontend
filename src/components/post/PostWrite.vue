@@ -1,7 +1,7 @@
 <template>
   <v-container class="pa-16" max-width="70%">
     <form @submit.prevent="submit">
-      <v-row class="border-b-md mb-0">
+      <v-row v-if="boardType !== 'ask'" class="border-b-md mb-0">
         <v-col class="mt-4 text-start" cols="2" md="2">
           <span>분류*</span>
         </v-col>
@@ -48,6 +48,14 @@
             rows="12"
             variant="outlined"
           ></v-textarea>
+        </v-col>
+      </v-row>
+      <v-row v-if="boardType === 'ask'">
+        <v-col class="mt-4 text-start" cols="2" md="2">
+          <span>비밀글</span>
+        </v-col>
+        <v-col>
+          <v-checkbox v-model="lockYn" :false-value="0" :value="1"></v-checkbox>
         </v-col>
       </v-row>
       <PostFileInput
@@ -104,6 +112,7 @@ const { handleSubmit } = useForm({
   validationSchema: {
     category(value) {
       if (value) return true;
+      if (boardType === 'ask') return true;
       return '카테고리를 선택해 주세요.';
     },
     title(value) {
@@ -128,6 +137,7 @@ const { handleSubmit } = useForm({
 const category = useField('category');
 const title = useField('title');
 const content = useField('content');
+const lockYn = ref(0);
 
 const files = ref([{}]);
 const removeFileIds = ref([]);
@@ -144,6 +154,7 @@ watchEffect(() => {
     title.value.value = props.post.title;
     content.value.value = props.post.content;
     responseFileList.value = props.fileList;
+    lockYn.value = props.post.lockYn;
   }
 });
 
@@ -153,9 +164,12 @@ watchEffect(() => {
 const submit = handleSubmit(values => {
   const formData = new FormData();
   if (postId) formData.append('postId', postId);
-  formData.append('categoryId', values.category.categoryId);
+  if (boardType !== 'ask') {
+    formData.append('categoryId', values.category.categoryId);
+  }
   formData.append('title', values.title);
   formData.append('content', values.content);
+  if (boardType === 'ask') formData.append('lockYn', lockYn.value);
   files.value.forEach(file => {
     if (file && file.size > 0) {
       formData.append('files', file);

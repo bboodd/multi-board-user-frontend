@@ -10,9 +10,6 @@ import router from '@/router';
 const categoryList = ref([]);
 
 const onSave = formData => {
-  for (const [key, value] of formData.entries()) {
-    console.log(key, value);
-  }
   savePost(formData).then(() => {
     router.push({ path: `/free` });
   });
