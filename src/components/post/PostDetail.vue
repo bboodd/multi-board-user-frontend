@@ -7,7 +7,12 @@
         >
       </v-col>
       <v-col class="text-left" cols="6" md="6">
-        <div>{{ props.post.title }}</div>
+        <div>
+          {{ props.post.title
+          }}<span v-if="boardType === 'ask'" class="ml-5">{{
+            props.post.answerCnt ? '(답변완료)' : '(미답변)'
+          }}</span>
+        </div>
       </v-col>
       <v-spacer></v-spacer>
       <v-col class="text-right" cols="3" md="3">
@@ -61,7 +66,7 @@
           <span
             class="clickable-download"
             @click="
-              downloadFile(props.post.postId, file.fileId, file.originalName)
+              downloadClick(props.post.postId, file.fileId, file.originalName)
             "
             >{{ file.originalName }}</span
           >
@@ -73,7 +78,6 @@
 
 <script setup>
 import { formatDate } from '@/utils/formater';
-import { downloadFile } from '@/apis/free/freeFileService';
 import { useRoute } from 'vue-router';
 
 const route = useRoute();
@@ -102,9 +106,15 @@ const props = defineProps({
   },
 });
 
+const emit = defineEmits(['download']);
+
 const selectContentRows = board => {
   if (board === 'free') return 13;
   if (board === 'gallery') return 6;
+};
+
+const downloadClick = (postId, fileId, originalName) => {
+  emit('download', postId, fileId, originalName);
 };
 
 onMounted(() => {});

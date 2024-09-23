@@ -13,3 +13,5 @@ const createAxiosService = url => {
 export const freeAxios = createAxiosService('free-board');
 export const memberAxios = createAxiosService('members');
 export const galleryAxios = createAxiosService('gallery-board');
+export const askAxios = createAxiosService('ask-board');
+export const noticeAxios = createAxiosService('notice-board');

@@ -1,7 +1,7 @@
 <template>
   <v-container class="pa-8 bg-grey-lighten-3" max-width="70%">
     <form @submit.prevent="submit">
-      <v-row v-if="nickname" class="">
+      <v-row v-if="nickname && boardType !== 'ask'" class="">
         <v-col cols="12" md="12">
           <v-textarea
             v-model="inputComment.value.value"
@@ -66,6 +66,8 @@ import { useRoute } from 'vue-router';
 const route = useRoute();
 
 const postId = route.params.id;
+
+const boardType = route.path.split('/')[1];
 
 const authStore = useAuthStore();
 

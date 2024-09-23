@@ -9,8 +9,6 @@ import { createRouter, createWebHistory } from 'vue-router/auto';
 import { setupLayouts } from 'virtual:generated-layouts';
 import { routes } from 'vue-router/auto-routes';
 import { useAuthStore } from '@/stores/auth.store';
-import { storeToRefs } from 'pinia';
-import _ from 'lodash';
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -38,15 +36,13 @@ router.isReady().then(() => {
 
 // TODO: 이거 붙이면 push 되다 안되다 하는거 해결해야함.
 router.beforeEach(async (to, from, next) => {
-  console.log('from: ', from, 'to: ', to);
   const authStore = useAuthStore();
-  const { accessToken } = storeToRefs(authStore);
   const authRequired = authRequiredCheck(to);
-  if (authRequired && !accessToken.value) {
+
+  if (authRequired && !authStore.accessToken) {
     next({ path: '/login' });
   } else {
     next();
-    console.log('next call');
   }
 });
 
@@ -64,11 +60,7 @@ const authRequiredCheck = to => {
     '/ask/write',
     '/ask/write/:id',
   ];
-  const privateParams = ['my'];
-  const required =
-    privatePages.includes(to.path) ||
-    _.some(privateParams, key => _.has(to.query, key));
-  return required;
+  return privatePages.includes(to.path);
 };
 
 export default router;

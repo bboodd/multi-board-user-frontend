@@ -1,5 +1,5 @@
 <template>
-  <PostDetail :file-list="fileList" :post="post" />
+  <PostDetail :file-list="fileList" :post="post" @download="download" />
   <PostComment :comment-list="commentList" />
   <v-row class="pa-6">
     <v-col>
@@ -34,7 +34,7 @@
 </template>
 
 <script setup>
-import { getFileList } from '@/apis/free/freeFileService';
+import { downloadFile, getFileList } from '@/apis/free/freeFileService';
 import { getPost } from '@/apis/free/freePostService';
 import router from '@/router';
 import { useAuthStore } from '@/stores/auth.store';
@@ -68,6 +68,10 @@ const updateBtn = () => {
     path: `/free/write/${postId}`,
     query: route.query,
   });
+};
+
+const download = (postId, fileId, originalName) => {
+  downloadFile(postId, fileId, originalName);
 };
 
 /**

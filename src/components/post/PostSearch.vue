@@ -32,7 +32,7 @@
         </v-date-input>
       </v-col>
 
-      <v-col cols="2" md="2">
+      <v-col v-if="boardType !== 'ask'" cols="2" md="2">
         <v-select
           v-model="selectCategory"
           class="pl-5 pr-5"
@@ -46,7 +46,10 @@
         </v-select>
       </v-col>
 
-      <v-col cols="4" md="4">
+      <v-col
+        :cols="boardType !== 'ask' ? 4 : 6"
+        :md="boardType !== 'ask' ? 4 : 6"
+      >
         <v-text-field
           v-model="inputKeyword"
           class="pl-5 pr-5"
@@ -65,6 +68,20 @@
           @click="searchBtn"
           >검색</v-btn
         >
+      </v-col>
+
+      <v-col
+        v-if="boardType === 'ask' && nickname"
+        class="mb-0 pb-0"
+        cols="12"
+        md="12"
+      >
+        <span class="float-left mt-2 ml-5">나의 문의 내역만 보기</span>
+        <v-checkbox
+          v-model="selectMyAsk"
+          density="compact"
+          :value="nickname"
+        ></v-checkbox>
       </v-col>
     </v-row>
 
@@ -113,6 +130,17 @@
 
 <script setup>
 import _ from 'lodash';
+import { useRoute } from 'vue-router';
+import { useAuthStore } from '@/stores/auth.store';
+import { storeToRefs } from 'pinia';
+
+const route = useRoute();
+
+const boardType = route.path.split('/')[1];
+
+const authStore = useAuthStore();
+
+const { nickname } = storeToRefs(authStore);
 
 const props = defineProps({
   categoryList: {
@@ -170,6 +198,7 @@ const selectRecordSize = ref(props.searchDto.recordSize);
 const selectCategory = ref();
 const selectOrderBy = ref();
 const selectSort = ref();
+const selectMyAsk = ref();
 
 /**
  * 검색 함수
@@ -189,6 +218,7 @@ const searchBtn = () => {
     recordSize: selectRecordSize.value,
     orderBy: selectOrderBy.value.orderBy,
     sortBy: selectSort.value.sortBy,
+    nickname: selectMyAsk.value,
   });
 
   emit('searchPost', changeSearch.value);
