@@ -10,7 +10,7 @@
         <div>
           {{ props.post.title
           }}<span v-if="boardType === 'ask'" class="ml-5">{{
-            props.post.answerCnt ? '(답변완료)' : '(미답변)'
+            props.post.commentCnt ? '(답변완료)' : '(미답변)'
           }}</span>
         </div>
       </v-col>
@@ -81,7 +81,6 @@ import { formatDate } from '@/utils/formater';
 import { useRoute } from 'vue-router';
 
 const route = useRoute();
-
 const boardType = route.path.split('/')[1];
 
 const props = defineProps({
@@ -116,8 +115,6 @@ const selectContentRows = board => {
 const downloadClick = (postId, fileId, originalName) => {
   emit('download', postId, fileId, originalName);
 };
-
-onMounted(() => {});
 </script>
 
 <style scoped>

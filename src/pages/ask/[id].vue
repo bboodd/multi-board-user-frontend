@@ -34,20 +34,19 @@
 </template>
 
 <script setup>
-import { getPost } from '@/apis/ask/askPostService';
+import { getPost } from '@/apis/postService';
+import { getCommentList } from '@/apis/commentService';
 import router from '@/router';
 import { useAuthStore } from '@/stores/auth.store';
 import { storeToRefs } from 'pinia';
 import { useRoute } from 'vue-router';
-import { getAnswerList } from '@/apis/ask/askAnswerService';
 
 const authStore = useAuthStore();
-
 const { nickname } = storeToRefs(authStore);
 
 const route = useRoute();
-
 const postId = route.params.id;
+const boardType = route.path.split('/')[1];
 
 const post = ref({});
 const commentList = ref([]);
@@ -76,10 +75,10 @@ const updateAndDeleteBtnFlag = computed(() => {
 });
 
 onMounted(() => {
-  getPost(postId).then(res => {
+  getPost(boardType, postId).then(res => {
     post.value = res.data;
   });
-  getAnswerList(postId).then(res => {
+  getCommentList(boardType, postId).then(res => {
     commentList.value = res.data;
   });
 });

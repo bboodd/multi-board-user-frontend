@@ -6,7 +6,6 @@
     @search-post="searchPost"
   />
   <PostList
-    :fin-post-list="finPostList"
     :pagination="pagination"
     :post-list="postList"
     :search-dto="searchDto"
@@ -21,12 +20,13 @@
 
 <script setup>
 import _ from 'lodash';
-import { getCategories } from '@/apis/notice/noticeCategoryService';
-import { getFinPosts, getPosts } from '@/apis/notice/noticePostService';
+import { getCategories } from '@/apis/categoryService';
+import { getPosts } from '@/apis/postService';
 import router from '@/router';
 import { useRoute } from 'vue-router';
 
 const route = useRoute();
+const boardType = route.path.split('/')[1];
 
 const aMonthAgo = computed(() => {
   const date = new Date();
@@ -50,7 +50,6 @@ const searchDto = ref({
 const categoryList = ref([]);
 const postList = ref([]);
 const pagination = ref({});
-const finPostList = ref([]);
 
 /**
  * 검색 함수
@@ -59,7 +58,7 @@ const finPostList = ref([]);
 const searchPost = changeSearch => {
   _.assign(searchDto.value, changeSearch);
 
-  getPosts(searchDto.value).then(res => {
+  getPosts(boardType, searchDto.value).then(res => {
     postList.value = res.data.listDto;
     pagination.value = res.data.paginationDto;
   });
@@ -72,7 +71,7 @@ const searchPost = changeSearch => {
 const movePage = changePage => {
   searchDto.value.page = changePage;
 
-  getPosts(searchDto.value).then(res => {
+  getPosts(boardType, searchDto.value).then(res => {
     postList.value = res.data.listDto;
     pagination.value = res.data.paginationDto;
   });
@@ -85,12 +84,16 @@ const movePage = changePage => {
 const emitSort = sortCondition => {
   _.assign(searchDto.value, sortCondition);
 
-  getPosts(searchDto.value).then(res => {
+  getPosts(boardType, searchDto.value).then(res => {
     postList.value = res.data.listDto;
     pagination.value = res.data.paginationDto;
   });
 };
 
+/**
+ * 상세보기로 이동하는 함수
+ * @param postId - 게시글 아이디
+ */
 const goDetail = postId => {
   router.push({
     path: `/notice/${postId}`,
@@ -98,16 +101,16 @@ const goDetail = postId => {
   });
 };
 
+/**
+ * 데이터 주입
+ */
 onMounted(() => {
-  getCategories().then(res => {
+  getCategories(boardType).then(res => {
     categoryList.value = res.data;
   });
-  getPosts(searchDto.value).then(res => {
+  getPosts(boardType, searchDto.value).then(res => {
     postList.value = res.data.listDto;
     pagination.value = res.data.paginationDto;
-  });
-  getFinPosts().then(res => {
-    finPostList.value = res.data;
   });
 });
 </script>

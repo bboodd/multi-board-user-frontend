@@ -3,20 +3,24 @@
 </template>
 
 <script setup>
-import { getCategories } from '@/apis/free/freeCategoryService';
-import { savePost } from '@/apis/free/freePostService';
+import { getCategories } from '@/apis/categoryService';
+import { savePost } from '@/apis/postService';
 import router from '@/router';
+import { useRoute } from 'vue-router';
+
+const route = useRoute();
+const boardType = route.path.split('/')[1];
 
 const categoryList = ref([]);
 
 const onSave = formData => {
-  savePost(formData).then(() => {
+  savePost(boardType, formData).then(() => {
     router.push({ path: `/free` });
   });
 };
 
 onMounted(() => {
-  getCategories().then(res => {
+  getCategories(boardType).then(res => {
     categoryList.value = res.data;
   });
 });

@@ -89,7 +89,7 @@
               item.title +
               ' ' +
               '(' +
-              (item.answerCnt ? '답변완료' : '미답변') +
+              (item.commentCnt ? '답변완료' : '미답변') +
               ')'
             }}</span>
             <span v-if="newFlag(item.createdDate)" class="ml-2 text-red"
@@ -137,7 +137,6 @@ import { useRoute } from 'vue-router';
 // import * as lodash from 'lodash';
 
 const route = useRoute();
-
 const boardType = route.path.split('/')[1];
 
 const props = defineProps({
@@ -157,12 +156,6 @@ const props = defineProps({
     type: Object,
     default: () => {
       return {};
-    },
-  },
-  finPostList: {
-    type: Array,
-    default: () => {
-      return [];
     },
   },
 });
@@ -228,7 +221,7 @@ const newFlag = createdDate => {
 };
 
 const postListWithIndexAndFinPosts = computed(() => {
-  if (!props.postList.length || !props.finPostList.length) return;
+  if (!props.postList.length) return;
   const postAndIndex = props.postList.map((postList, index) => ({
     ...postList,
     index:
@@ -236,7 +229,9 @@ const postListWithIndexAndFinPosts = computed(() => {
       (props.searchDto.page - 1) * props.searchDto.pageSize -
       index,
   }));
-  return props.finPostList.concat(postAndIndex);
+
+  const finPostList = props.postList.filter(post => post.finYn === true);
+  return finPostList.concat(postAndIndex);
 });
 
 const titleClick = postId => {

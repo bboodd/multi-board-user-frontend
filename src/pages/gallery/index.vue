@@ -26,12 +26,13 @@
 
 <script setup>
 import _ from 'lodash';
-import { getCategories } from '@/apis/gallery/galleryCategoryService';
-import { getPosts } from '@/apis/gallery/galleryPostService';
+import { getCategories } from '@/apis/categoryService';
+import { getPosts } from '@/apis/postService';
 import router from '@/router';
 import { useRoute } from 'vue-router';
 
 const route = useRoute();
+const boardType = route.path.split('/')[1];
 
 const aMonthAgo = computed(() => {
   const date = new Date();
@@ -63,7 +64,7 @@ const pagination = ref({});
 const searchPost = changeSearch => {
   _.assign(searchDto.value, changeSearch);
 
-  getPosts(searchDto.value).then(res => {
+  getPosts(boardType, searchDto.value).then(res => {
     postList.value = res.data.listDto;
     pagination.value = res.data.paginationDto;
   });
@@ -76,7 +77,7 @@ const searchPost = changeSearch => {
 const movePage = changePage => {
   searchDto.value.page = changePage;
 
-  getPosts(searchDto.value).then(res => {
+  getPosts(boardType, searchDto.value).then(res => {
     postList.value = res.data.listDto;
     pagination.value = res.data.paginationDto;
   });
@@ -89,7 +90,7 @@ const movePage = changePage => {
 const emitSort = sortCondition => {
   _.assign(searchDto.value, sortCondition);
 
-  getPosts(searchDto.value).then(res => {
+  getPosts(boardType, searchDto.value).then(res => {
     postList.value = res.data.listDto;
     pagination.value = res.data.paginationDto;
   });
@@ -109,11 +110,11 @@ const writeBtn = () => {
 };
 
 onMounted(() => {
-  getCategories().then(res => {
+  getCategories(boardType).then(res => {
     categoryList.value = res.data;
   });
 
-  getPosts(searchDto.value).then(res => {
+  getPosts(boardType, searchDto.value).then(res => {
     postList.value = res.data.listDto;
     pagination.value = res.data.paginationDto;
   });

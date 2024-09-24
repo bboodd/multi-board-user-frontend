@@ -94,7 +94,6 @@ import { useRoute } from 'vue-router';
 // import _ from 'lodash';
 
 const route = useRoute();
-
 const boardType = route.path.split('/')[1];
 
 const props = defineProps({
@@ -200,6 +199,7 @@ const downloadBtn = (postId, fileId, originalName) => {
   emit('downloadEmit', postId, fileId, originalName);
 };
 </script>
+
 <style scoped>
 .upload-name {
   display: inline-block;

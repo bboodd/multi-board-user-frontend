@@ -33,19 +33,18 @@
 </template>
 
 <script setup>
-import { getPost } from '@/apis/notice/noticePostService';
+import { getPost } from '@/apis/postService';
 import router from '@/router';
 import { useAuthStore } from '@/stores/auth.store';
 import { storeToRefs } from 'pinia';
 import { useRoute } from 'vue-router';
 
 const authStore = useAuthStore();
-
 const { nickname } = storeToRefs(authStore);
 
 const route = useRoute();
-
 const postId = route.params.id;
+const boardType = route.path.split('/')[1];
 
 const post = ref({});
 
@@ -73,7 +72,7 @@ const updateAndDeleteBtnFlag = computed(() => {
 });
 
 onMounted(() => {
-  getPost(postId).then(res => {
+  getPost(boardType, postId).then(res => {
     post.value = res.data;
   });
 });
