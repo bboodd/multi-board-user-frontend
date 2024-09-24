@@ -55,7 +55,7 @@
           <span>비밀글</span>
         </v-col>
         <v-col>
-          <v-checkbox v-model="lockYn" :false-value="0" :value="1"></v-checkbox>
+          <v-checkbox v-model="lockYn"></v-checkbox>
         </v-col>
       </v-row>
       <PostFileInput
@@ -80,9 +80,7 @@ import _ from 'lodash';
 import { useRoute } from 'vue-router';
 
 const route = useRoute();
-
 const postId = route.params.id;
-
 const boardType = route.path.split('/')[1];
 
 const props = defineProps({
@@ -137,7 +135,7 @@ const { handleSubmit } = useForm({
 const category = useField('category');
 const title = useField('title');
 const content = useField('content');
-const lockYn = ref(0);
+const lockYn = ref(false);
 
 const files = ref([{}]);
 const removeFileIds = ref([]);

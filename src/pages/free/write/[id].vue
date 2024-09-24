@@ -9,21 +9,21 @@
 </template>
 <script setup>
 import { useRoute } from 'vue-router';
-import { getCategories } from '@/apis/free/freeCategoryService';
-import { downloadFile, getFileList } from '@/apis/free/freeFileService';
-import { getPost, updatePost } from '@/apis/free/freePostService';
+import { getCategories } from '@/apis/categoryService';
+import { downloadFile, getFileList } from '@/apis/fileService';
+import { getPost, updatePost } from '@/apis/postService';
 import router from '@/router';
 
 const route = useRoute();
-
 const postId = route.params.id;
+const boardType = route.path.split('/')[1];
 
 const categoryList = ref([]);
 const post = ref({});
 const fileList = ref([]);
 
 const onUpdate = formData => {
-  updatePost(postId, formData).then(() => {
+  updatePost(boardType, postId, formData).then(() => {
     router.push({
       path: `/free/${postId}`,
       query: route.query,
@@ -32,17 +32,17 @@ const onUpdate = formData => {
 };
 
 const download = (postId, fileId, originalName) => {
-  downloadFile(postId, fileId, originalName);
+  downloadFile(boardType, postId, fileId, originalName);
 };
 
 onMounted(() => {
-  getCategories().then(res => {
+  getCategories(boardType).then(res => {
     categoryList.value = res.data;
   });
-  getPost(postId).then(res => {
+  getPost(boardType, postId).then(res => {
     post.value = res.data;
   });
-  getFileList(postId).then(res => {
+  getFileList(boardType, postId).then(res => {
     fileList.value = res.data;
   });
 });

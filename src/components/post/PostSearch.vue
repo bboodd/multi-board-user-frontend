@@ -135,11 +135,9 @@ import { useAuthStore } from '@/stores/auth.store';
 import { storeToRefs } from 'pinia';
 
 const route = useRoute();
-
 const boardType = route.path.split('/')[1];
 
 const authStore = useAuthStore();
-
 const { nickname } = storeToRefs(authStore);
 
 const props = defineProps({

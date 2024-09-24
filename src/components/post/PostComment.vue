@@ -59,18 +59,12 @@ import { formatDate } from '@/utils/formater';
 import { useAuthStore } from '@/stores/auth.store';
 import { storeToRefs } from 'pinia';
 import { useField, useForm } from 'vee-validate';
-import { saveComment } from '@/apis/free/freeCommentService';
-import router from '@/router';
 import { useRoute } from 'vue-router';
 
 const route = useRoute();
-
-const postId = route.params.id;
-
 const boardType = route.path.split('/')[1];
 
 const authStore = useAuthStore();
-
 const { nickname } = storeToRefs(authStore);
 
 const props = defineProps({
@@ -81,6 +75,8 @@ const props = defineProps({
     },
   },
 });
+
+const emit = defineEmits(['saveComment']);
 
 const { handleSubmit } = useForm({
   validationSchema: {
@@ -100,9 +96,7 @@ const submit = handleSubmit(values => {
   const commentRequest = ref({
     content: values.inputComment,
   });
-  saveComment(postId, commentRequest.value).then(() => {
-    router.push({ path: `/free/${postId}`, query: route.query });
-  });
+  emit('saveComment', commentRequest.value);
 });
 
 const deleteClick = commentId => {

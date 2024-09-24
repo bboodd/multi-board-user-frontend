@@ -68,7 +68,7 @@
 </template>
 
 <script setup>
-import { checkDuplicate, signup } from '@/apis/member/memberService';
+import { checkDuplicate, signup } from '@/apis/memberService';
 import router from '@/router';
 
 const valid = ref(false);

@@ -33,20 +33,19 @@
 </template>
 
 <script setup>
-import { getFileList } from '@/apis/gallery/galleryFileService';
-import { getPost } from '@/apis/gallery/galleryPostService';
+import { getFileList } from '@/apis/fileService';
+import { getPost } from '@/apis/postService';
 import router from '@/router';
 import { useAuthStore } from '@/stores/auth.store';
 import { storeToRefs } from 'pinia';
 import { useRoute } from 'vue-router';
 
 const authStore = useAuthStore();
-
 const { nickname } = storeToRefs(authStore);
 
 const route = useRoute();
-
 const postId = route.params.id;
+const boardType = route.path.split('/')[1];
 
 const post = ref({});
 const fileList = ref([]);
@@ -99,10 +98,10 @@ const updateAndDeleteBtnFlag = computed(() => {
 });
 
 onMounted(() => {
-  getPost(postId).then(res => {
+  getPost(boardType, postId).then(res => {
     post.value = res.data;
   });
-  getFileList(postId).then(res => {
+  getFileList(boardType, postId).then(res => {
     fileList.value = res.data;
   });
 });

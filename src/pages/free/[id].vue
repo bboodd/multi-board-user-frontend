@@ -1,6 +1,6 @@
 <template>
   <PostDetail :file-list="fileList" :post="post" @download="download" />
-  <PostComment :comment-list="commentList" />
+  <PostComment :comment-list="commentList" @save-comment="onSaveComment" />
   <v-row class="pa-6">
     <v-col>
       <v-btn
@@ -34,21 +34,20 @@
 </template>
 
 <script setup>
-import { downloadFile, getFileList } from '@/apis/free/freeFileService';
-import { getPost } from '@/apis/free/freePostService';
+import { downloadFile, getFileList } from '@/apis/fileService';
+import { getPost } from '@/apis/postService';
+import { getCommentList, saveComment } from '@/apis/commentService';
 import router from '@/router';
 import { useAuthStore } from '@/stores/auth.store';
 import { storeToRefs } from 'pinia';
 import { useRoute } from 'vue-router';
-import { getCommentList } from '@/apis/free/freeCommentService';
 
 const authStore = useAuthStore();
-
 const { nickname } = storeToRefs(authStore);
 
 const route = useRoute();
-
 const postId = route.params.id;
+const boardType = route.path.split('/')[1];
 
 const post = ref({});
 const fileList = ref([]);
@@ -70,8 +69,14 @@ const updateBtn = () => {
   });
 };
 
+const onSaveComment = commentRequest => {
+  saveComment(boardType, postId, commentRequest.value).then(() => {
+    router.push({ path: `/free/${postId}`, query: route.query });
+  });
+};
+
 const download = (postId, fileId, originalName) => {
-  downloadFile(postId, fileId, originalName);
+  downloadFile(boardType, postId, fileId, originalName);
 };
 
 /**
@@ -82,13 +87,13 @@ const updateAndDeleteBtnFlag = computed(() => {
 });
 
 onMounted(() => {
-  getPost(postId).then(res => {
+  getPost(boardType, postId).then(res => {
     post.value = res.data;
   });
-  getFileList(postId).then(res => {
+  getFileList(boardType, postId).then(res => {
     fileList.value = res.data;
   });
-  getCommentList(postId).then(res => {
+  getCommentList(boardType, postId).then(res => {
     commentList.value = res.data;
   });
 });
