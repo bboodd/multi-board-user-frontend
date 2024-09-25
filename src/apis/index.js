@@ -8,6 +8,10 @@ const axiosInstance = axios.create({
 
 axiosInstance.interceptors.request.use(
   // 요청 보내기 전
+  //   request => {
+  //     console.log(request);
+  //     return request;
+  //   },
   config => {
     const { accessToken } = useAuthStore();
 
@@ -62,6 +66,9 @@ axiosInstance.interceptors.response.use(
     }
 
     if ([400, 404, 500].includes(error.response.status)) {
+      if (error.response.status === 404) {
+        router.push('/404');
+      }
       alert(error.response.data.message);
       return Promise.reject(error);
     }
@@ -71,9 +78,3 @@ axiosInstance.interceptors.response.use(
 );
 
 export default axiosInstance;
-
-export const freeAxios = createAxiosService('free-board');
-export const memberAxios = createAxiosService('members');
-export const galleryAxios = createAxiosService('gallery-board');
-export const askAxios = createAxiosService('ask-board');
-export const noticeAxios = createAxiosService('notice-board');

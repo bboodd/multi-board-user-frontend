@@ -7,7 +7,7 @@
           class="mb-2"
           clearable
           :counter="12"
-          :error-messages="loginIdAlredyExists"
+          :error-messages="loginIdAlreadyExists"
           label="아이디"
           prepend-inner-icon="mdi-account"
           :readonly="loading"
@@ -42,11 +42,13 @@
           v-model="signupRequest.nickname"
           clearable
           :counter="10"
+          :error-messages="nicknameAlreadyExists"
           label="이름"
           prepend-inner-icon="mdi-account"
           :readonly="loading"
           required
           :rules="rules.nickname"
+          @change="nicknameDuplicateCheck"
         ></v-text-field>
 
         <br />
@@ -68,7 +70,11 @@
 </template>
 
 <script setup>
-import { checkDuplicate, signup } from '@/apis/memberService';
+import {
+  checkDuplicateLoginId,
+  checkDuplicateNickname,
+  signup,
+} from '@/apis/memberService';
 import router from '@/router';
 
 const valid = ref(false);
@@ -79,7 +85,8 @@ const signupRequest = ref({
   nickname: '',
 });
 const loading = ref(false);
-const loginIdAlredyExists = ref([]);
+const loginIdAlreadyExists = ref([]);
+const nicknameAlreadyExists = ref([]);
 const rules = ref({
   loginId: [
     v => !!v || 'ID는 필수입니다.',
@@ -156,14 +163,32 @@ const submit = () => {
 const loginIdDuplicateCheck = async e => {
   loginIdAlredyExists.value = ['아이디 중복 확인중...'];
   const checkDuplicateRequest = ref({
-    loginId: e.target.value,
+    str: e.target.value,
   });
-  const res = await checkDuplicate(checkDuplicateRequest.value);
+  const res = await checkDuplicateLoginId(checkDuplicateRequest.value);
 
   if (res.valid) {
     loginIdAlredyExists.value = [];
   } else {
     loginIdAlredyExists.value = ['중복된 아이디 입니다.'];
+  }
+};
+
+/**
+ * 닉네임 중복확인 여부 확인하는 함수
+ * @param e - event
+ */
+const nicknameDuplicateCheck = async e => {
+  nicknameAlredyExists.value = ['닉네임 중복 확인중...'];
+  const checkDuplicateRequest = ref({
+    str: e.target.value,
+  });
+  const res = await checkDuplicateNickname(checkDuplicateRequest.value);
+
+  if (res.valid) {
+    loginIdAlredyExists.value = [];
+  } else {
+    loginIdAlredyExists.value = ['중복된 닉네임 입니다.'];
   }
 };
 

@@ -18,6 +18,7 @@ export const useAuthStore = defineStore('auth', () => {
 
       const previousPage = computed(() => {
         const lastPath = router.options.history.state.back;
+        if (lastPath === '/signup') return '/';
         return lastPath || '/';
       });
 

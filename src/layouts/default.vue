@@ -1,20 +1,14 @@
 <template>
-  <v-app>
-    <ErrorBoundary>
+  <Suspense>
+    <v-main>
       <AppHeader />
-
-      <Suspense>
-        <v-main>
-          <router-view />
-        </v-main>
-        <template #fallback>
-          <LoadingSpinner />
-        </template>
-      </Suspense>
-
+      <router-view />
       <AppFooter />
-    </ErrorBoundary>
-  </v-app>
+    </v-main>
+    <template #fallback>
+      <LoadingSpinner />
+    </template>
+  </Suspense>
 </template>
 
 <script setup>
