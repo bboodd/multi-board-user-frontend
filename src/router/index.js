@@ -35,23 +35,7 @@ router.isReady().then(() => {
 });
 
 // TODO: 이거 붙이면 push 되다 안되다 하는거 해결해야함.
-router.beforeEach(async (to, from, next) => {
-  const authStore = useAuthStore();
-  const authRequired = authRequiredCheck(to);
-
-  if (authRequired && !authStore.accessToken) {
-    next({ path: '/login' });
-  } else {
-    next();
-  }
-});
-
-/**
- * 로그인이 필요한 경로인지 체크하는 함수
- * @param {*} to - 경로
- * @returns - boolean
- */
-const authRequiredCheck = to => {
+router.beforeEach(async to => {
   const privatePages = [
     '/free/write',
     '/free/write/:id',
@@ -60,7 +44,13 @@ const authRequiredCheck = to => {
     '/ask/write',
     '/ask/write/:id',
   ];
-  return privatePages.includes(to.path);
-};
+  const authRequired = privatePages.includes(to.path);
+
+  const authStore = useAuthStore();
+
+  if (authRequired && !authStore.nickname) {
+    return '/login';
+  }
+});
 
 export default router;

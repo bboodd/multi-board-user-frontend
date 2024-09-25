@@ -8,9 +8,22 @@ const authentication = async loginRequest => {
 };
 
 // 아이디 중복확인
-const checkDuplicate = async checkDuplicateRequest => {
+const checkDuplicateLoginId = async checkDuplicateRequest => {
   const res = await axiosInstance.post(
-    '/members/check-duplicate',
+    '/members/check-duplicate/loginId',
+    checkDuplicateRequest,
+    {
+      headers: { 'Content-Type': 'application/json' },
+    }
+  );
+
+  return res.data;
+};
+
+// 닉네임 중복확인
+const checkDuplicateNickname = async checkDuplicateRequest => {
+  const res = await axiosInstance.post(
+    '/members/check-duplicate/nickname',
     checkDuplicateRequest,
     {
       headers: { 'Content-Type': 'application/json' },
@@ -29,4 +42,9 @@ const signup = async signupRequest => {
   return res.data;
 };
 
-export { authentication, checkDuplicate, signup };
+export {
+  authentication,
+  checkDuplicateLoginId,
+  checkDuplicateNickname,
+  signup,
+};

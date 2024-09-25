@@ -80,6 +80,7 @@
         <v-checkbox
           v-model="selectMyAsk"
           density="compact"
+          false-value=""
           :value="nickname"
         ></v-checkbox>
       </v-col>
@@ -218,6 +219,8 @@ const searchBtn = () => {
     sortBy: selectSort.value.sortBy,
     nickname: selectMyAsk.value,
   });
+
+  console.log(changeSearch.value);
 
   emit('searchPost', changeSearch.value);
 };

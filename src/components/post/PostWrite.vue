@@ -104,7 +104,7 @@ const props = defineProps({
   },
 });
 
-const emit = defineEmits('onSave', 'onUpdate', 'download');
+const emit = defineEmits('savePost', 'updatePost', 'download');
 
 const { handleSubmit } = useForm({
   validationSchema: {
@@ -177,9 +177,9 @@ const submit = handleSubmit(values => {
 
   // 수정 혹은 등록
   if (postId) {
-    emit('onUpdate', formData);
+    emit('updatePost', formData);
   } else {
-    emit('onSave', formData);
+    emit('savePost', formData);
   }
 });
 

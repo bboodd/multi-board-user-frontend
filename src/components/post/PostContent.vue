@@ -33,7 +33,7 @@
     <v-row v-if="boardType === 'gallery'">
       <v-carousel>
         <v-carousel-item
-          v-for="(item, idx) in props.imgUrlList"
+          v-for="(item, idx) in imgUrlList"
           :key="idx"
           cover
           :src="item.src"
@@ -96,13 +96,6 @@ const props = defineProps({
       return [];
     },
   },
-  imgUrlList: {
-    // TODO: 파일 로컬에 저장해서 못불러오는거 해결해야함.(서버에서 resource or firebase or s3)?
-    type: Array,
-    default: () => {
-      return [];
-    },
-  },
 });
 
 const emit = defineEmits(['download']);
@@ -111,6 +104,30 @@ const selectContentRows = board => {
   if (board === 'free') return 13;
   if (board === 'gallery') return 6;
 };
+
+const imgUrlList = ref([
+  {
+    src: 'https://cdn.vuetifyjs.com/images/carousel/squirrel.jpg',
+  },
+  {
+    src: 'https://cdn.vuetifyjs.com/images/carousel/sky.jpg',
+  },
+  {
+    src: 'https://cdn.vuetifyjs.com/images/carousel/bird.jpg',
+  },
+  {
+    src: 'https://cdn.vuetifyjs.com/images/carousel/planet.jpg',
+  },
+  {
+    src: 'https://cdn.vuetifyjs.com/images/cards/docks.jpg',
+  },
+  {
+    src: 'https://cdn.vuetifyjs.com/images/cards/hotel.jpg',
+  },
+  {
+    src: 'https://cdn.vuetifyjs.com/images/cards/sunshine.jpg',
+  },
+]);
 
 const downloadClick = (postId, fileId, originalName) => {
   emit('download', postId, fileId, originalName);

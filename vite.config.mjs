@@ -18,7 +18,10 @@ export default defineConfig(({ mode }) => {
   return {
     plugins: [
       VueRouter(),
-      Layouts(),
+      Layouts({
+        layoutsDirs: 'src/layouts',
+        defaultLayout: 'default',
+      }),
       Vue({
         template: { transformAssetUrls },
       }),

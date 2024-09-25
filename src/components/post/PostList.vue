@@ -67,7 +67,11 @@
               @click="titleClick(item.postId)"
             >
               <div class="text-h6">
-                <strong>{{ item.title }}</strong>
+                <strong>{{
+                  item.title +
+                  ' ' +
+                  (item.fileCnt ? '+(' + item.fileCnt + ')' : '')
+                }}</strong>
                 <span v-if="newFlag(item.createdDate)" class="ml-2 text-red"
                   >new</span
                 >
@@ -85,13 +89,17 @@
         <tr>
           <td class="text-start">{{ item.index }}</td>
           <td class="text-start text-body-1">
-            <span class="clickable-title" @click="titleClick(item.postId)">{{
-              item.title +
-              ' ' +
-              '(' +
-              (item.commentCnt ? '답변완료' : '미답변') +
-              ')'
-            }}</span>
+            <span
+              class="clickable-title"
+              @click="titleClick(item.postId, item.lockYn, item.nickname)"
+              >{{
+                item.title +
+                ' ' +
+                '(' +
+                (item.commentCnt ? '답변완료' : '미답변') +
+                ')'
+              }}</span
+            >
             <span v-if="newFlag(item.createdDate)" class="ml-2 text-red"
               >new</span
             >
@@ -134,6 +142,7 @@
 <script setup>
 import { formatDate } from '@/utils/formater';
 import { useRoute } from 'vue-router';
+import { useAuthStore } from '@/stores/auth.store';
 // import * as lodash from 'lodash';
 
 const route = useRoute();
@@ -234,7 +243,11 @@ const postListWithIndexAndFinPosts = computed(() => {
   return finPostList.concat(postAndIndex);
 });
 
-const titleClick = postId => {
+const titleClick = (postId, lockYn, nickname) => {
+  const authStore = useAuthStore();
+  if (lockYn && nickname !== authStore.nickname) {
+    return alert('비밀 글 입니다.');
+  }
   emit('goDetail', postId);
 };
 </script>
