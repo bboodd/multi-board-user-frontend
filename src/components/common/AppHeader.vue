@@ -45,8 +45,8 @@
         ></v-divider>
 
         <router-link
-          :class="{ 'router-link-active': isActive('/ask') }"
-          to="/ask"
+          :class="{ 'router-link-active': isActive('/qna') }"
+          to="/qna"
         >
           문의 게시판
         </router-link>
@@ -80,11 +80,17 @@ import router from '@/router';
 import { useAuthStore } from '@/stores/auth.store';
 import { storeToRefs } from 'pinia';
 import { useRoute } from 'vue-router';
+import { me } from '@/apis/memberService';
 
 const route = useRoute();
 
 const authStore = useAuthStore();
-const { nickname } = storeToRefs(authStore);
+const { nickname, accessToken } = storeToRefs(authStore);
+if (!nickname.value && accessToken.value) {
+  me().then(res => {
+    nickname.value = res.nickname;
+  });
+}
 
 const isActive = basePath => {
   return route.path.startsWith(basePath);

@@ -41,8 +41,8 @@ router.beforeEach(async to => {
     '/free/write/:id',
     '/gallery/write',
     '/gallery/write/:id',
-    '/ask/write',
-    '/ask/write/:id',
+    '/qna/write',
+    '/qna/write/:id',
   ];
   const authRequired = privatePages.includes(to.path);
 

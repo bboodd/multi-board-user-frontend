@@ -1,7 +1,7 @@
 <template>
   <v-container class="pa-8 bg-grey-lighten-3" max-width="70%">
     <form @submit.prevent="submit">
-      <v-row v-if="nickname && boardType !== 'ask'" class="">
+      <v-row v-if="nickname && boardType !== 'qna'" class="">
         <v-col cols="12" md="12">
           <v-textarea
             v-model="inputComment.value.value"
@@ -36,14 +36,14 @@
           ><strong>{{ comment.nickname }}</strong></span
         >
         &nbsp;
-        <span>{{ formatDate(comment.createdDate) }}</span>
+        <span>{{ formatDate(comment.createdAt) }}</span>
       </v-col>
       <v-spacer></v-spacer>
       <v-col cols="1" md="1">
         <span
           v-if="nickname === comment.nickname"
           class="clickable-delete"
-          @click="deleteClick(comment.commentId)"
+          @click="deleteClick(comment.id)"
           >삭제</span
         >
       </v-col>

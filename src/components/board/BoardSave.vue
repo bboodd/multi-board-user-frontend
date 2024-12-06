@@ -1,5 +1,5 @@
 <template>
-  <PostWrite :category-list="categoryList" @save-post="onSavePost" />
+  <PostWrite :category-list="categoryList" @save-post="handleSavePost" />
 </template>
 
 <script setup>
@@ -13,7 +13,7 @@ const boardType = route.path.split('/')[1];
 
 const categoryList = ref([]);
 
-const onSavePost = formData => {
+const handleSavePost = formData => {
   savePost(boardType, formData).then(() => {
     router.push({ path: `/${boardType}` });
   });
@@ -21,7 +21,7 @@ const onSavePost = formData => {
 
 onMounted(() => {
   getCategories(boardType).then(res => {
-    categoryList.value = res.data;
+    categoryList.value = res;
   });
 });
 </script>

@@ -1,7 +1,7 @@
 <template>
   <v-container class="pa-16" max-width="70%">
     <form @submit.prevent="submit">
-      <v-row v-if="boardType !== 'ask'" class="border-b-md mb-0">
+      <v-row v-if="boardType !== 'qna'" class="border-b-md mb-0">
         <v-col class="mt-4 text-start" cols="2" md="2">
           <span>분류*</span>
         </v-col>
@@ -9,8 +9,8 @@
           <v-select
             v-model="category.value.value"
             :error-messages="category.errorMessage.value"
-            item-title="categoryName"
-            item-value="categoryId"
+            item-title="name"
+            item-value="id"
             :items="props.categoryList"
             label="분류 선택"
             return-object
@@ -50,12 +50,12 @@
           ></v-textarea>
         </v-col>
       </v-row>
-      <v-row v-if="boardType === 'ask'">
+      <v-row v-if="boardType === 'qna'">
         <v-col class="mt-4 text-start" cols="2" md="2">
           <span>비밀글</span>
         </v-col>
         <v-col>
-          <v-checkbox v-model="lockYn"></v-checkbox>
+          <v-checkbox v-model="locked"></v-checkbox>
         </v-col>
       </v-row>
       <PostFileInput
@@ -104,13 +104,13 @@ const props = defineProps({
   },
 });
 
-const emit = defineEmits('savePost', 'updatePost', 'download');
+const emit = defineEmits(['savePost', 'updatePost', 'download']);
 
 const { handleSubmit } = useForm({
   validationSchema: {
     category(value) {
       if (value) return true;
-      if (boardType === 'ask') return true;
+      if (boardType === 'qna') return true;
       return '카테고리를 선택해 주세요.';
     },
     title(value) {
@@ -135,7 +135,7 @@ const { handleSubmit } = useForm({
 const category = useField('category');
 const title = useField('title');
 const content = useField('content');
-const lockYn = ref(false);
+const locked = ref(false);
 
 const files = ref([{}]);
 const removeFileIds = ref([]);
@@ -147,12 +147,12 @@ const responseFileList = ref([]);
 watchEffect(() => {
   if (!_.isEmpty(props.post)) {
     category.value.value = _.find(props.categoryList, object => {
-      return object.categoryId === props.post.categoryId;
+      return object.id === props.post.categoryId;
     });
     title.value.value = props.post.title;
     content.value.value = props.post.content;
     responseFileList.value = props.fileList;
-    lockYn.value = props.post.lockYn;
+    locked.value = props.post.locked;
   }
 });
 
@@ -162,12 +162,14 @@ watchEffect(() => {
 const submit = handleSubmit(values => {
   const formData = new FormData();
   if (postId) formData.append('postId', postId);
-  if (boardType !== 'ask') {
-    formData.append('categoryId', values.category.categoryId);
+  if (boardType !== 'qna' && values.category) {
+    const categoryId = values.category?.id;
+    formData.append('categoryId', categoryId);
+    console.log('categoryId:', categoryId);
   }
   formData.append('title', values.title);
   formData.append('content', values.content);
-  if (boardType === 'ask') formData.append('lockYn', lockYn.value);
+  if (boardType === 'qna') formData.append('locked', locked.value);
   files.value.forEach(file => {
     if (file && file.size > 0) {
       formData.append('files', file);

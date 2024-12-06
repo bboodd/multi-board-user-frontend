@@ -89,13 +89,13 @@ const updateAndDeleteBtnFlag = computed(() => {
 
 onMounted(() => {
   getPost(boardType, postId).then(res => {
-    post.value = res.data;
+    post.value = res;
   });
   getFileList(boardType, postId).then(res => {
-    fileList.value = res.data;
+    fileList.value = res;
   });
   getCommentList(boardType, postId).then(res => {
-    commentList.value = res.data;
+    commentList.value = res;
   });
 });
 </script>

@@ -10,11 +10,10 @@ export const useAuthStore = defineStore('auth', () => {
 
   const login = loginRequest => {
     authentication(loginRequest).then(res => {
-      nickname.value = res.nickname;
-      accessToken.value = res.token.accessToken;
+      console.log(res);
+      accessToken.value = res.accessToken;
 
       localStorage.setItem('accessToken', JSON.stringify(accessToken.value));
-      localStorage.setItem('nickname', JSON.stringify(nickname.value));
 
       const previousPage = computed(() => {
         const lastPath = router.options.history.state.back;

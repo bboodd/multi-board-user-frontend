@@ -5,39 +5,68 @@
         >등록일시</span
       >
       <v-col cols="2" md="2">
-        <v-date-input
-          v-model="selectDate.startDate"
-          class="pl-5 pr-5"
-          label="시작일"
-          :max="selectDate.endDate"
-          :min="aYearAgo"
-          prepend-icon=""
-          prepend-inner-icon="$calendar"
-          variant="outlined"
-        ></v-date-input>
+        <!-- 시작일 선택 -->
+        <v-menu
+          v-model="startDateMenu"
+          :close-on-content-click="false"
+          offset-y
+          transition="scale-transition"
+        >
+          <template #activator="{ props: menuProps }">
+            <v-text-field
+              v-bind="menuProps"
+              label="시작일"
+              :model-value="formattedStartDate"
+              readonly
+              variant="outlined"
+            ></v-text-field>
+          </template>
+          <v-date-picker
+            v-model="selectDate.startDate"
+            class="pl-5 pr-5"
+            elevation="0"
+            :max="selectDate.endDate"
+            :min="aYearAgo"
+            @update:model-value="startDateMenu = false"
+          ></v-date-picker>
+        </v-menu>
       </v-col>
 
       <span style="float: left; margin-top: 18px">~</span>
       <v-col cols="2" md="2">
-        <v-date-input
-          v-model="selectDate.endDate"
-          class="pl-5 pr-5"
-          label="종료일"
-          :max="maxDate"
-          :min="selectDate.startDate"
-          prepend-icon=""
-          prepend-inner-icon="$calendar"
-          variant="outlined"
+        <!-- 종료일 선택 -->
+        <v-menu
+          v-model="endDateMenu"
+          :close-on-content-click="false"
+          offset-y
+          transition="scale-transition"
         >
-        </v-date-input>
+          <template #activator="{ props: menuProps }">
+            <v-text-field
+              v-bind="menuProps"
+              label="종료일"
+              :model-value="formattedEndDate"
+              readonly
+              variant="outlined"
+            ></v-text-field>
+          </template>
+          <v-date-picker
+            v-model="selectDate.endDate"
+            class="pl-5 pr-5"
+            elevation="0"
+            :max="maxDate"
+            :min="selectDate.startDate"
+            @update:model-value="endDateMenu = false"
+          ></v-date-picker>
+        </v-menu>
       </v-col>
 
-      <v-col v-if="boardType !== 'ask'" cols="2" md="2">
+      <v-col v-if="boardType !== 'qna'" cols="2" md="2">
         <v-select
           v-model="selectCategory"
           class="pl-5 pr-5"
-          item-title="categoryName"
-          item-value="categotyId"
+          item-title="name"
+          item-value="id"
           :items="computedCategoryList"
           label="분류"
           return-object
@@ -47,8 +76,8 @@
       </v-col>
 
       <v-col
-        :cols="boardType !== 'ask' ? 4 : 6"
-        :md="boardType !== 'ask' ? 4 : 6"
+        :cols="boardType !== 'qna' ? 4 : 6"
+        :md="boardType !== 'qna' ? 4 : 6"
       >
         <v-text-field
           v-model="inputKeyword"
@@ -71,7 +100,7 @@
       </v-col>
 
       <v-col
-        v-if="boardType === 'ask' && nickname"
+        v-if="boardType === 'qna' && nickname"
         class="mb-0 pb-0"
         cols="12"
         md="12"
@@ -90,7 +119,7 @@
       <v-col cols="1" md="1">
         <v-select
           v-model="selectRecordSize"
-          item-value="recordSize"
+          item-value="size"
           :items="recordSizeList"
           label="페이지 당"
           variant="outlined"
@@ -141,6 +170,9 @@ const boardType = route.path.split('/')[1];
 const authStore = useAuthStore();
 const { nickname } = storeToRefs(authStore);
 
+const startDateMenu = ref(false);
+const endDateMenu = ref(false);
+
 const props = defineProps({
   categoryList: {
     type: Array,
@@ -161,17 +193,18 @@ const emit = defineEmits(['searchPost', 'emitSort']);
 const loading = ref(false);
 
 const computedCategoryList = computed(() => {
-  const list = props.categoryList;
-  const allCategory = { categoryId: 0, categoryName: '전체 분류' };
+  const list = [...props.categoryList];
+  const allCategory = { id: 0, name: '전체 분류' };
   list.unshift(allCategory);
   return list;
 });
+
 const recordSizeList = ref([10, 20, 30, 40, 50]);
 const orderByList = ref([
-  { orderByName: '등록일시', orderBy: 'createdDate' },
+  { orderByName: '등록일시', orderBy: 'createdAt' },
   { orderByName: '분류', orderBy: 'categoryId' },
   { orderByName: '제목', orderBy: 'title' },
-  { orderByName: '조회수', orderBy: 'viewCnt' },
+  { orderByName: '조회수', orderBy: 'viewCount' },
 ]);
 const sortList = ref([
   { sortName: '내림차순', sortBy: 'desc' },
@@ -180,23 +213,45 @@ const sortList = ref([
 
 const aYearAgo = computed(() => {
   const date = new Date();
-  return new Date(date.setFullYear(date.getFullYear() - 1));
+  date.setFullYear(date.getFullYear() - 1);
+  return date.toISOString().substr(0, 10);
+});
+
+// 날짜 포맷 함수
+const formatDate = dateStr => {
+  if (!dateStr) return '';
+  const date = new Date(dateStr);
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}.${month}.${day}`;
+};
+
+// 포맷된 날짜를 반환하는 computed 속성
+const formattedStartDate = computed(() => {
+  return formatDate(selectDate.value.startDate);
+});
+
+const formattedEndDate = computed(() => {
+  return formatDate(selectDate.value.endDate);
 });
 
 /**
  * 화면에서 선택시 변경되는 값들 + 기본값 세팅
  */
 const selectDate = ref({
-  startDate: props.searchDto.startDate,
-  endDate: props.searchDto.endDate || new Date(),
+  startDate: props.searchDto.startDate
+    ? new Date(props.searchDto.startDate)
+    : null,
+  endDate: props.searchDto.endDate ? new Date(props.searchDto.endDate) : null,
 });
-const maxDate = ref(new Date().toDateString());
+const maxDate = ref(new Date().toISOString().substr(0, 10));
 const inputKeyword = ref(props.searchDto.keyword);
-const selectRecordSize = ref(props.searchDto.recordSize);
+const selectRecordSize = ref(props.searchDto.size || 10);
 // 아래의 빈 값은 props변경시 자동으로 기본값 세팅이 안되기 때문에 watchEffect로 감시
 const selectCategory = ref();
-const selectOrderBy = ref();
-const selectSort = ref();
+const selectOrderBy = ref(orderByList.value[0]);
+const selectSort = ref(sortList.value[0]);
 const selectMyAsk = ref();
 
 /**
@@ -210,17 +265,14 @@ const searchBtn = () => {
   const changeSearch = ref({
     startDate: selectDate.value.startDate,
     endDate: selectDate.value.endDate,
-    categoryId: selectCategory.value.categoryId,
+    categoryId: selectCategory.value.id,
     keyword: inputKeyword.value,
     page: props.searchDto.page,
-    pageSize: props.searchDto.pageSize,
-    recordSize: selectRecordSize.value,
+    size: selectRecordSize.value,
     orderBy: selectOrderBy.value.orderBy,
     sortBy: selectSort.value.sortBy,
     nickname: selectMyAsk.value,
   });
-
-  console.log(changeSearch.value);
 
   emit('searchPost', changeSearch.value);
 };
@@ -229,28 +281,42 @@ const searchBtn = () => {
  * 검색조건 변경 함수
  */
 const changeSort = () => {
-  const sortCondition = ref({
-    recordSize: selectRecordSize.value,
+  // null check 추가
+  if (!selectOrderBy.value || !selectSort.value) {
+    console.warn('정렬 조건이 선택되지 않았습니다.');
+    return;
+  }
+
+  const sortCondition = {
+    size: selectRecordSize.value || 10,
     orderBy: selectOrderBy.value.orderBy,
     sortBy: selectSort.value.sortBy,
-  });
+  };
 
-  emit('emitSort', sortCondition.value);
+  emit('emitSort', sortCondition);
 };
 
+/** 
 /**
  * props값 변경 감시
  */
 watchEffect(() => {
+  // 카테고리 설정
   selectCategory.value = _.find(computedCategoryList.value, obj => {
-    return obj.categoryId === props.searchDto.categoryId;
+    return obj.id === (props.searchDto.categoryId || 0);
   });
-  selectOrderBy.value = _.find(orderByList.value, obj => {
+
+  // orderBy 설정
+  const foundOrderBy = _.find(orderByList.value, obj => {
     return obj.orderBy === props.searchDto.orderBy;
   });
-  selectSort.value = _.find(sortList.value, obj => {
+  selectOrderBy.value = foundOrderBy || orderByList.value[0];
+
+  // sort 설정
+  const foundSort = _.find(sortList.value, obj => {
     return obj.sortBy === props.searchDto.sortBy;
   });
+  selectSort.value = foundSort || sortList.value[0];
 });
 
 onMounted(() => {});
