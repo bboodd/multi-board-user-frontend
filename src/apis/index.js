@@ -61,14 +61,12 @@ axiosInstance.interceptors.response.use(
           });
       } else {
         // 리프레시 토큰이 없다면
+        logout();
         router.push('/');
       }
     }
 
     if ([400, 404, 500].includes(error.response.status)) {
-      if (error.response.status === 404) {
-        router.push('/404');
-      }
       alert(error.response.data.message);
       return Promise.reject(error);
     }

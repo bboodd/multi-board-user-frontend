@@ -30,25 +30,26 @@ import { getCategories } from '@/apis/categoryService';
 import { getPosts } from '@/apis/postService';
 import router from '@/router';
 import { useRoute } from 'vue-router';
+import dayjs from 'dayjs';
 
 const route = useRoute();
 const boardType = route.path.split('/')[1];
 
 const aMonthAgo = computed(() => {
-  const date = new Date();
-  return new Date(date.setMonth(date.getMonth() - 1));
+  return dayjs().subtract(1, 'month').format('YYYY-MM-DDTHH:mm:ss');
 });
 
 const searchDto = ref({
   startDate: route.query?.startDate
-    ? new Date(route.query.startDate)
+    ? dayjs(route.query.startDate).format('YYYY-MM-DDTHH:mm:ss')
     : aMonthAgo.value,
-  endDate: route.query?.endDate ? new Date(route.query.endDate) : '',
+  endDate: route.query?.endDate
+    ? dayjs(route.query.endDate).format('YYYY-MM-DDTHH:mm:ss')
+    : dayjs().format('YYYY-MM-DDTHH:mm:ss'),
   categoryId: route.query?.categoryId ? parseInt(route.query.categoryId) : 0,
   keyword: route.query.keyword ?? '',
   page: route.query?.page ? parseInt(route.query.page) : 1,
-  recordSize: route.query?.recordSize ? parseInt(route.query.recordSize) : 10,
-  pageSize: route.query?.pageSize ? parseInt(route.query.pageSize) : 10,
+  size: route.query?.size ? parseInt(route.query.size) : 10,
   orderBy: route.query.orderBy ?? 'createdDate',
   sortBy: route.query.sortBy ?? 'desc',
   nickname: route.query?.nickname ?? '',
@@ -63,11 +64,17 @@ const pagination = ref({});
  * @param changeSearch - 검색 정보
  */
 const searchPost = changeSearch => {
-  lodash.assign(searchDto.value, changeSearch);
+  const formattedSearch = {
+    ...changeSearch,
+    startDate: dayjs(changeSearch.startDate).format('YYYY-MM-DDTHH:mm:ss'),
+    endDate: dayjs(changeSearch.endDate).format('YYYY-MM-DDTHH:mm:ss'),
+  };
+
+  lodash.assign(searchDto.value, formattedSearch);
 
   getPosts(boardType, searchDto.value).then(res => {
-    postList.value = res.data.listDto;
-    pagination.value = res.data.paginationDto;
+    postList.value = res.data;
+    pagination.value = res.pagination;
   });
 };
 
@@ -79,8 +86,8 @@ const movePage = changePage => {
   searchDto.value.page = changePage;
 
   getPosts(boardType, searchDto.value).then(res => {
-    postList.value = res.data.listDto;
-    pagination.value = res.data.paginationDto;
+    postList.value = res.data;
+    pagination.value = res.pagination;
   });
 };
 
@@ -92,8 +99,8 @@ const emitSort = sortCondition => {
   lodash.assign(searchDto.value, sortCondition);
 
   getPosts(boardType, searchDto.value).then(res => {
-    postList.value = res.data.listDto;
-    pagination.value = res.data.paginationDto;
+    postList.value = res.data;
+    pagination.value = res.pagination;
   });
 };
 
@@ -110,12 +117,12 @@ const writeBtn = () => {
 
 onMounted(() => {
   getCategories(boardType).then(res => {
-    categoryList.value = res.data;
+    categoryList.value = res;
   });
 
   getPosts(boardType, searchDto.value).then(res => {
-    postList.value = res.data.listDto;
-    pagination.value = res.data.paginationDto;
+    postList.value = res.data;
+    pagination.value = res.pagination;
   });
 });
 </script>

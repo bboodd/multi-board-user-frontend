@@ -20,10 +20,6 @@ declare module 'vue-router/auto-routes' {
   export interface RouteNamedMap {
     '/': RouteRecordInfo<'/', '/', Record<never, never>, Record<never, never>>,
     '/[...path]': RouteRecordInfo<'/[...path]', '/:path(.*)', { path: ParamValue<true> }, { path: ParamValue<false> }>,
-    '/ask/': RouteRecordInfo<'/ask/', '/ask', Record<never, never>, Record<never, never>>,
-    '/ask/[id]': RouteRecordInfo<'/ask/[id]', '/ask/:id', { id: ParamValue<true> }, { id: ParamValue<false> }>,
-    '/ask/write/': RouteRecordInfo<'/ask/write/', '/ask/write', Record<never, never>, Record<never, never>>,
-    '/ask/write/[id]': RouteRecordInfo<'/ask/write/[id]', '/ask/write/:id', { id: ParamValue<true> }, { id: ParamValue<false> }>,
     '/free/': RouteRecordInfo<'/free/', '/free', Record<never, never>, Record<never, never>>,
     '/free/[id]': RouteRecordInfo<'/free/[id]', '/free/:id', { id: ParamValue<true> }, { id: ParamValue<false> }>,
     '/free/write/': RouteRecordInfo<'/free/write/', '/free/write', Record<never, never>, Record<never, never>>,
@@ -35,6 +31,10 @@ declare module 'vue-router/auto-routes' {
     '/login': RouteRecordInfo<'/login', '/login', Record<never, never>, Record<never, never>>,
     '/notice/': RouteRecordInfo<'/notice/', '/notice', Record<never, never>, Record<never, never>>,
     '/notice/[id]': RouteRecordInfo<'/notice/[id]', '/notice/:id', { id: ParamValue<true> }, { id: ParamValue<false> }>,
+    '/qna/': RouteRecordInfo<'/qna/', '/qna', Record<never, never>, Record<never, never>>,
+    '/qna/[id]': RouteRecordInfo<'/qna/[id]', '/qna/:id', { id: ParamValue<true> }, { id: ParamValue<false> }>,
+    '/qna/write/': RouteRecordInfo<'/qna/write/', '/qna/write', Record<never, never>, Record<never, never>>,
+    '/qna/write/[id]': RouteRecordInfo<'/qna/write/[id]', '/qna/write/:id', { id: ParamValue<true> }, { id: ParamValue<false> }>,
     '/signup': RouteRecordInfo<'/signup', '/signup', Record<never, never>, Record<never, never>>,
   }
 }

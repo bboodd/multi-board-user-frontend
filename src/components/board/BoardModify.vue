@@ -37,13 +37,13 @@ const download = (postId, fileId, originalName) => {
 
 onMounted(() => {
   getCategories(boardType).then(res => {
-    categoryList.value = res.data;
+    categoryList.value = res;
   });
   getPost(boardType, postId).then(res => {
-    post.value = res.data;
+    post.value = res;
   });
   getFileList(boardType, postId).then(res => {
-    fileList.value = res.data;
+    fileList.value = res;
   });
 });
 </script>

@@ -35,14 +35,14 @@
             class="mb-5 ml-5"
             color="indigo"
             size="large"
-            @click="downloadBtn(file.postId, file.fileId, file.originalName)"
+            @click="downloadBtn(file.id, file.id, file.originalName)"
             >다운로드</v-btn
           >
           <v-btn
             append-icon="mdi-close"
             class="mb-6 ml-5 pl-1"
             color="red"
-            @click="removeFileBtn(idx, file.fileId)"
+            @click="removeFileBtn(idx, file.id)"
           ></v-btn>
         </div>
       </div>

@@ -8,7 +8,7 @@
               v-if="props.pagination"
               v-model="page"
               class="my-4"
-              :length="props.pagination.totalPageCount"
+              :length="props.pagination.totalPages"
               :show-first-last-page="true"
               variant="outlined"
               @update:model-value="changePage"
