@@ -12,6 +12,7 @@ declare module 'vue' {
     AppFooter: typeof import('./src/components/common/AppFooter.vue')['default']
     AppHeader: typeof import('./src/components/common/AppHeader.vue')['default']
     BoardDetail: typeof import('./src/components/board/BoardDetail.vue')['default']
+    BoardList: typeof import('./src/components/board/BoardList.vue')['default']
     BoardMain: typeof import('./src/components/board/BoardMain.vue')['default']
     BoardModify: typeof import('./src/components/board/BoardModify.vue')['default']
     BoardSave: typeof import('./src/components/board/BoardSave.vue')['default']
