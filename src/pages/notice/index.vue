@@ -1,5 +1,5 @@
-<template>
-  <BoardMain />
-</template>
-
 <script setup></script>
+
+<template>
+  <BoardList />
+</template>

@@ -1,128 +1,359 @@
+<script setup>
+import { useRouter } from 'vue-router';
+import { getDashboardPosts } from '@/apis/postService';
+import { getThumbnail } from '@/apis/fileService';
+import { formatDate } from '@/utils/formater';
+
+const router = useRouter();
+
+const boardPreviews = ref({
+  freePosts: [],
+  galleryPosts: [],
+  qnaPosts: [],
+  noticePosts: [],
+});
+
+const loading = ref(true);
+
+const BOARD_CONFIG = {
+  notice: {
+    title: '공지사항',
+    icon: 'mdi-bullhorn',
+    color: 'blue-lighten-1',
+    dataKey: 'noticePosts',
+    path: 'notice',
+  },
+  free: {
+    title: '자유게시판',
+    icon: 'mdi-forum',
+    color: 'green-lighten-1',
+    dataKey: 'freePosts',
+    path: 'free',
+  },
+  gallery: {
+    title: '갤러리',
+    icon: 'mdi-image',
+    color: 'purple-lighten-1',
+    dataKey: 'galleryPosts',
+    path: 'gallery',
+  },
+  qna: {
+    title: 'Q&A',
+    icon: 'mdi-help-circle',
+    color: 'orange-lighten-1',
+    dataKey: 'qnaPosts',
+    path: 'qna',
+  },
+};
+
+const fetchDashboardPosts = async () => {
+  try {
+    loading.value = true;
+    const res = await getDashboardPosts();
+
+    // 응답 데이터가 있는 경우에만 할당
+    if (res) {
+      boardPreviews.value = {
+        noticePosts: res.data.noticePosts || [],
+        freePosts: res.data.freePosts || [],
+        galleryPosts: res.data.galleryPosts || [],
+        qnaPosts: res.data.qnaPosts || [],
+      };
+    }
+  } catch (error) {
+    console.error('대시보드 데이터 로딩 실패:', error);
+  } finally {
+    loading.value = false;
+  }
+};
+
+const goToBoard = boardType => {
+  router.push(`/${BOARD_CONFIG[boardType].path}`);
+};
+
+const goToPost = (boardType, postId) => {
+  router.push(`/${BOARD_CONFIG[boardType].path}/${postId}`);
+};
+
+const isNew = createdAt => {
+  const oneWeekAgo = new Date();
+  oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+  return new Date(createdAt) > oneWeekAgo;
+};
+
+const thumbnailUrls = ref({});
+
+const loadThumbnail = async postId => {
+  try {
+    const response = await getThumbnail('gallery', postId);
+    thumbnailUrls.value[postId] =
+      response.data || 'https://cdn.vuetifyjs.com/images/parallax/material.jpg';
+  } catch (error) {
+    console.error('썸네일 로딩 실패:', error);
+    thumbnailUrls.value[postId] =
+      'https://cdn.vuetifyjs.com/images/parallax/material.jpg';
+  }
+};
+
+// 갤러리 게시글의 썸네일 로드
+watch(
+  () => boardPreviews.value.galleryPosts,
+  async newPosts => {
+    if (newPosts?.length) {
+      for (const post of newPosts) {
+        await loadThumbnail(post.id);
+      }
+    }
+  },
+  { immediate: true }
+);
+
+onMounted(fetchDashboardPosts);
+</script>
+
 <template>
-  <PostSearch
-    :category-list="categoryList"
-    :search-dto="searchDto"
-    @emit-sort="emitSort"
-    @search-post="searchPost"
-  />
-  <v-row v-if="boardType !== 'notice'" class="pr-3">
-    <v-spacer></v-spacer>
-    <v-btn class="mr-16" color="primary" size="large" @click="writeBtn"
-      >글 등록</v-btn
-    >
-  </v-row>
-  <PostList
-    :pagination="pagination"
-    :post-list="postList"
-    :search-dto="searchDto"
-    @go-detail="goDetail"
-  />
-  <PostPaging
-    :pagination="pagination"
-    :search-dto="searchDto"
-    @move-page="movePage"
-  />
+  <v-container class="board-main">
+    <v-row>
+      <v-col v-for="(board, type) in BOARD_CONFIG" :key="type" cols="12" md="6">
+        <v-card class="board-preview" :color="board.color">
+          <v-card-title class="d-flex align-center">
+            <v-icon class="mr-2" :icon="board.icon" />
+            {{ board.title }}
+            <v-spacer />
+            <v-btn variant="text" @click="goToBoard(type)">
+              더보기
+              <v-icon icon="mdi-chevron-right" />
+            </v-btn>
+          </v-card-title>
+
+          <v-card-text class="bg-white">
+            <v-list v-if="!loading" lines="two">
+              <template v-if="boardPreviews[board.dataKey]?.length">
+                <v-list-item
+                  v-for="post in boardPreviews[board.dataKey]"
+                  :key="post.id"
+                  class="preview-item"
+                  @click="goToPost(type, post.id)"
+                >
+                  <!-- 공지사항 -->
+                  <template v-if="type === 'notice'">
+                    <v-list-item-title class="d-flex align-center">
+                      <v-chip class="mr-2" size="x-small">{{
+                        post.categoryName
+                      }}</v-chip>
+                      <span class="text-truncate">{{ post.title }}</span>
+                      <v-chip
+                        v-if="isNew(post.createdAt)"
+                        class="ml-2"
+                        color="red"
+                        size="x-small"
+                        >NEW</v-chip
+                      >
+                    </v-list-item-title>
+                  </template>
+
+                  <!-- 자유게시판 -->
+                  <template v-if="type === 'free'">
+                    <v-list-item-title class="d-flex align-center">
+                      <v-chip class="mr-2" size="x-small">{{
+                        post.categoryName
+                      }}</v-chip>
+                      <span class="text-truncate">{{ post.title }}</span>
+                      <v-chip
+                        v-if="post.commentCount"
+                        class="ml-2"
+                        color="primary"
+                        size="x-small"
+                        >{{ post.commentCount }}</v-chip
+                      >
+                      <v-chip
+                        v-if="isNew(post.createdAt)"
+                        class="ml-2"
+                        color="red"
+                        size="x-small"
+                        >NEW</v-chip
+                      >
+                      <v-icon
+                        v-if="post.fileCount > 0"
+                        class="ml-2"
+                        color="grey"
+                        size="small"
+                        >mdi-paperclip</v-icon
+                      >
+                    </v-list-item-title>
+                  </template>
+
+                  <!-- 갤러리 -->
+                  <template v-if="type === 'gallery'">
+                    <v-list-item-title class="d-flex align-center">
+                      <v-chip class="mr-2" size="x-small">{{
+                        post.categoryName
+                      }}</v-chip>
+                      <div class="gallery-container">
+                        <v-avatar size="40">
+                          <v-img
+                            cover
+                            :loading="!thumbnailUrls[post.id]"
+                            :src="
+                              thumbnailUrls[post.id] ||
+                              'https://cdn.vuetifyjs.com/images/parallax/material.jpg'
+                            "
+                          >
+                            <template #placeholder>
+                              <v-progress-circular indeterminate />
+                            </template>
+                          </v-img>
+                        </v-avatar>
+                        <span v-if="post.fileCount > 1" class="file-count">
+                          +{{ post.fileCount - 1 }}
+                        </span>
+                      </div>
+                      <span class="text-truncate">{{ post.title }}</span>
+                      <v-chip
+                        v-if="isNew(post.createdAt)"
+                        class="ml-2"
+                        color="red"
+                        size="x-small"
+                        >NEW</v-chip
+                      >
+                    </v-list-item-title>
+                  </template>
+
+                  <!-- 문의게시판 -->
+                  <template v-if="type === 'qna'">
+                    <v-list-item-title class="d-flex align-center">
+                      <span class="text-truncate">{{ post.title }}</span>
+                      <v-chip
+                        class="ml-2"
+                        :color="post.commentCount ? 'success' : 'warning'"
+                        size="x-small"
+                      >
+                        {{ post.commentCount ? '답변완료' : '미답변' }}
+                      </v-chip>
+                      <v-chip
+                        v-if="isNew(post.createdAt)"
+                        class="ml-2"
+                        color="red"
+                        size="x-small"
+                        >NEW</v-chip
+                      >
+                      <v-icon
+                        v-if="post.locked"
+                        class="ml-2"
+                        color="grey"
+                        size="small"
+                        >mdi-lock</v-icon
+                      >
+                    </v-list-item-title>
+                  </template>
+
+                  <v-list-item-subtitle
+                    class="d-flex align-center text-caption"
+                  >
+                    <span>{{ post.nickname }}</span>
+                    <v-divider class="mx-2" vertical />
+                    <span>{{ formatDate(post.createdAt) }}</span>
+                    <v-divider class="mx-2" vertical />
+                    <span>조회 {{ post.viewCount }}</span>
+                  </v-list-item-subtitle>
+                </v-list-item>
+              </template>
+              <v-list-item v-else>
+                <div class="text-center pa-4">게시글이 없습니다.</div>
+              </v-list-item>
+            </v-list>
+            <div
+              v-else
+              class="d-flex justify-center align-center"
+              style="height: 200px"
+            >
+              <v-progress-circular indeterminate />
+            </div>
+          </v-card-text>
+        </v-card>
+      </v-col>
+    </v-row>
+  </v-container>
 </template>
 
-<script setup>
-import * as lodash from 'lodash';
-import { getCategories } from '@/apis/categoryService';
-import { getPosts } from '@/apis/postService';
-import router from '@/router';
-import { useRoute } from 'vue-router';
-import dayjs from 'dayjs';
+<style scoped>
+.board-main {
+  padding: 24px;
+}
 
-const route = useRoute();
-const boardType = route.path.split('/')[1];
+.board-preview {
+  height: 100%;
+  min-height: 400px;
+}
 
-const aMonthAgo = computed(() => {
-  return dayjs().subtract(1, 'month').format('YYYY-MM-DDTHH:mm:ss');
-});
+.preview-item {
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
 
-const searchDto = ref({
-  startDate: route.query?.startDate
-    ? dayjs(route.query.startDate).format('YYYY-MM-DDTHH:mm:ss')
-    : aMonthAgo.value,
-  endDate: route.query?.endDate
-    ? dayjs(route.query.endDate).format('YYYY-MM-DDTHH:mm:ss')
-    : dayjs().format('YYYY-MM-DDTHH:mm:ss'),
-  categoryId: route.query?.categoryId ? parseInt(route.query.categoryId) : 0,
-  keyword: route.query.keyword ?? '',
-  page: route.query?.page ? parseInt(route.query.page) : 1,
-  size: route.query?.size ? parseInt(route.query.size) : 10,
-  orderBy: route.query.orderBy ?? 'createdDate',
-  sortBy: route.query.sortBy ?? 'desc',
-  nickname: route.query?.nickname ?? '',
-});
+.preview-item:hover {
+  background-color: rgba(0, 0, 0, 0.04);
+}
 
-const categoryList = ref([]);
-const postList = ref([]);
-const pagination = ref({});
+.v-card-title {
+  border-bottom: 1px solid rgba(0, 0, 0, 0.12);
+  padding: 16px;
+}
 
-/**
- * 검색 함수
- * @param changeSearch - 검색 정보
- */
-const searchPost = changeSearch => {
-  const formattedSearch = {
-    ...changeSearch,
-    startDate: dayjs(changeSearch.startDate).format('YYYY-MM-DDTHH:mm:ss'),
-    endDate: dayjs(changeSearch.endDate).format('YYYY-MM-DDTHH:mm:ss'),
-  };
+.v-list {
+  background: transparent;
+}
 
-  lodash.assign(searchDto.value, formattedSearch);
+.text-truncate {
+  max-width: 200px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: inline-block;
+}
 
-  getPosts(boardType, searchDto.value).then(res => {
-    postList.value = res.data;
-    pagination.value = res.pagination;
-  });
-};
+.position-relative {
+  position: relative;
+}
 
-/**
- * 페이지 이동 함수
- * @param changePage - 페이지 번호
- */
-const movePage = changePage => {
-  searchDto.value.page = changePage;
+.file-count-chip {
+  position: absolute;
+  right: -12px;
+  bottom: -8px;
+  padding: 0 8px;
+  font-weight: bold;
+  border: 2px solid white;
+  min-width: 28px;
+  justify-content: center;
+}
 
-  getPosts(boardType, searchDto.value).then(res => {
-    postList.value = res.data;
-    pagination.value = res.pagination;
-  });
-};
+.text-truncate {
+  max-width: 200px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
 
-/**
- * 검색 조건 변경 후 데이터 렌더링 함수
- * @param sortCondition - 검색 조건 정보
- */
-const emitSort = sortCondition => {
-  lodash.assign(searchDto.value, sortCondition);
+.gallery-thumbnail {
+  position: relative;
+  overflow: visible;
+}
+.gallery-container {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-right: 12px;
+}
 
-  getPosts(boardType, searchDto.value).then(res => {
-    postList.value = res.data;
-    pagination.value = res.pagination;
-  });
-};
-
-const goDetail = postId => {
-  router.push({
-    path: `/${boardType}/${postId}`,
-    query: searchDto.value,
-  });
-};
-
-const writeBtn = () => {
-  router.push({ path: `/${boardType}/write`, query: searchDto.value });
-};
-
-onMounted(() => {
-  getCategories(boardType).then(res => {
-    categoryList.value = res;
-  });
-
-  getPosts(boardType, searchDto.value).then(res => {
-    postList.value = res.data;
-    pagination.value = res.pagination;
-  });
-});
-</script>
+.file-count {
+  background: rgba(0, 0, 0, 0.7);
+  color: white;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: bold;
+  min-width: 20px;
+  text-align: center;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+</style>

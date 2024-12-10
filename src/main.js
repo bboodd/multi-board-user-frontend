@@ -11,8 +11,6 @@ import { registerPlugins } from '@/plugins';
 // Components
 import App from './App.vue';
 
-// Composables
-
 const app = createApp(App);
 
 registerPlugins(app);

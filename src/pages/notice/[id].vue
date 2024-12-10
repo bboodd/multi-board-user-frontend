@@ -1,5 +1,5 @@
+<script setup></script>
+
 <template>
   <BoardDetail />
 </template>
-
-<script setup></script>

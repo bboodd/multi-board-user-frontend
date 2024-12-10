@@ -1,33 +1,45 @@
-<template>
-  <PostWrite
-    :category-list="categoryList"
-    :file-list="fileList"
-    :post="post"
-    @download="download"
-    @update-post="onUpdatePost"
-  />
-</template>
 <script setup>
-import { useRoute } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 import { getCategories } from '@/apis/categoryService';
-import { downloadFile, getFileList } from '@/apis/fileService';
+import { downloadFile } from '@/apis/fileService';
 import { getPost, updatePost } from '@/apis/postService';
-import router from '@/router';
 
 const route = useRoute();
+const router = useRouter();
+
 const postId = route.params.id;
 const boardType = route.path.split('/')[1];
 
-const categoryList = ref([]);
-const post = ref({});
-const fileList = ref([]);
+// 상태 관리
+const state = ref({
+  categoryList: [],
+  post: {},
+  fileList: [],
+  isSubmitting: false,
+});
 
-const onUpdatePost = formData => {
-  updatePost(boardType, postId, formData).then(() => {
-    router.push({
-      path: `/${boardType}/${postId}`,
-      query: route.query,
-    });
+// 데이터 로드 함수
+const fetchData = async () => {
+  const [categories, postData] = await Promise.all([
+    getCategories(boardType),
+    getPost(boardType, postId),
+  ]);
+
+  state.value = {
+    categoryList: categories.data,
+    post: postData.data,
+    fileList: postData.data.files,
+  };
+};
+
+const onUpdatePost = async formData => {
+  if (state.value.isSubmitting) return;
+
+  state.value.isSubmitting = true;
+  await updatePost(boardType, postId, formData);
+  router.push({
+    path: `/${boardType}/${postId}`,
+    query: route.query,
   });
 };
 
@@ -35,15 +47,23 @@ const download = (postId, fileId, originalName) => {
   downloadFile(boardType, postId, fileId, originalName);
 };
 
-onMounted(() => {
-  getCategories(boardType).then(res => {
-    categoryList.value = res;
-  });
-  getPost(boardType, postId).then(res => {
-    post.value = res;
-  });
-  getFileList(boardType, postId).then(res => {
-    fileList.value = res;
-  });
-});
+onMounted(fetchData);
 </script>
+<template>
+  <div class="post-update-container">
+    <PostWrite
+      :category-list="state.categoryList"
+      :file-list="state.fileList"
+      :is-submitting="state.isSubmitting"
+      :post="state.post"
+      @download="download"
+      @update-post="onUpdatePost"
+    />
+  </div>
+</template>
+
+<style scoped>
+.post-update-container {
+  width: 100%;
+}
+</style>

@@ -1,74 +1,3 @@
-<template>
-  <v-sheet class="pa-16" rounded>
-    <v-card class="mx-auto px-6 py-8" :elevation="12" max-width="40%">
-      <v-form v-model="valid" validate-on="blur" @submit.prevent="submit">
-        <v-text-field
-          v-model="signupRequest.loginId"
-          class="mb-2"
-          clearable
-          :counter="12"
-          :error-messages="loginIdAlreadyExists"
-          label="아이디"
-          prepend-inner-icon="mdi-account"
-          :readonly="loading"
-          :rules="rules.loginId"
-          @change="loginIdDuplicateCheck"
-        ></v-text-field>
-
-        <v-text-field
-          v-model="signupRequest.password"
-          clearable
-          :counter="16"
-          label="비밀번호"
-          prepend-inner-icon="mdi-lock"
-          :readonly="loading"
-          :rules="rules.password"
-          type="password"
-        ></v-text-field>
-
-        <v-text-field
-          v-model="signupRequest.checkPassword"
-          clearable
-          :counter="16"
-          label="비밀번호 확인"
-          prepend-inner-icon="mdi-lock"
-          :readonly="loading"
-          required
-          :rules="rules.checkPassword"
-          type="password"
-        ></v-text-field>
-
-        <v-text-field
-          v-model="signupRequest.nickname"
-          clearable
-          :counter="10"
-          :error-messages="nicknameAlreadyExists"
-          label="이름"
-          prepend-inner-icon="mdi-account"
-          :readonly="loading"
-          required
-          :rules="rules.nickname"
-          @change="nicknameDuplicateCheck"
-        ></v-text-field>
-
-        <br />
-
-        <v-btn
-          block
-          color="primary"
-          :disabled="!valid"
-          :loading="loading"
-          size="large"
-          type="submit"
-          variant="elevated"
-        >
-          회원가입
-        </v-btn>
-      </v-form>
-    </v-card>
-  </v-sheet>
-</template>
-
 <script setup>
 import {
   checkDuplicateLoginId,
@@ -143,17 +72,20 @@ const rules = ref({
 /**
  * 회원가입 버튼 함수
  */
-const submit = () => {
+const submit = async () => {
   if (!valid.value) return;
 
-  loading.value = true;
-
-  setTimeout(() => (loading.value = false), 2000);
-
-  signup(signupRequest.value).then(res => {
-    alert(res.message);
+  try {
+    loading.value = true;
+    await signup(signupRequest.value);
+    alert('회원가입 완료');
     router.push({ path: '/login' });
-  });
+  } catch (error) {
+    alert('회원가입 중 오류가 발생했습니다.');
+    console.error('회원가입 실패:', error);
+  } finally {
+    loading.value = false;
+  }
 };
 
 /**
@@ -161,16 +93,16 @@ const submit = () => {
  * @param e - event
  */
 const loginIdDuplicateCheck = async e => {
-  loginIdAlredyExists.value = ['아이디 중복 확인중...'];
-  const checkDuplicateRequest = ref({
-    str: e.target.value,
-  });
-  const res = await checkDuplicateLoginId(checkDuplicateRequest.value);
+  loginIdAlreadyExists.value = ['아이디 중복 확인중...'];
+  const checkDuplicateRequest = {
+    value: e.target.value,
+  };
+  const res = await checkDuplicateLoginId(checkDuplicateRequest);
 
-  if (res.valid) {
-    loginIdAlredyExists.value = [];
+  if (res.data) {
+    loginIdAlreadyExists.value = [];
   } else {
-    loginIdAlredyExists.value = ['중복된 아이디 입니다.'];
+    loginIdAlreadyExists.value = ['중복된 아이디 입니다.'];
   }
 };
 
@@ -179,16 +111,16 @@ const loginIdDuplicateCheck = async e => {
  * @param e - event
  */
 const nicknameDuplicateCheck = async e => {
-  nicknameAlredyExists.value = ['닉네임 중복 확인중...'];
-  const checkDuplicateRequest = ref({
-    str: e.target.value,
-  });
-  const res = await checkDuplicateNickname(checkDuplicateRequest.value);
+  nicknameAlreadyExists.value = ['닉네임 중복 확인중...'];
+  const checkDuplicateRequest = {
+    value: e.target.value,
+  };
+  const res = await checkDuplicateNickname(checkDuplicateRequest);
 
-  if (res.valid) {
-    loginIdAlredyExists.value = [];
+  if (res.data) {
+    nicknameAlreadyExists.value = [];
   } else {
-    loginIdAlredyExists.value = ['중복된 닉네임 입니다.'];
+    nicknameAlreadyExists.value = ['중복된 닉네임 입니다.'];
   }
 };
 
@@ -200,3 +132,74 @@ const passwordEqualsCheck = checkPassword => {
   return signupRequest.value.password === checkPassword;
 };
 </script>
+
+<template>
+  <v-sheet class="pa-16" rounded>
+    <v-card class="mx-auto px-6 py-8" :elevation="12" max-width="40%">
+      <v-form v-model="valid" validate-on="blur" @submit.prevent="submit">
+        <v-text-field
+          v-model="signupRequest.loginId"
+          class="mb-2"
+          clearable
+          :counter="12"
+          :error-messages="loginIdAlreadyExists"
+          label="아이디"
+          prepend-inner-icon="mdi-account"
+          :readonly="loading"
+          :rules="rules.loginId"
+          @change="loginIdDuplicateCheck"
+        ></v-text-field>
+
+        <v-text-field
+          v-model="signupRequest.password"
+          clearable
+          :counter="16"
+          label="비밀번호"
+          prepend-inner-icon="mdi-lock"
+          :readonly="loading"
+          :rules="rules.password"
+          type="password"
+        ></v-text-field>
+
+        <v-text-field
+          v-model="signupRequest.checkPassword"
+          clearable
+          :counter="16"
+          label="비밀번호 확인"
+          prepend-inner-icon="mdi-lock"
+          :readonly="loading"
+          required
+          :rules="rules.checkPassword"
+          type="password"
+        ></v-text-field>
+
+        <v-text-field
+          v-model="signupRequest.nickname"
+          clearable
+          :counter="10"
+          :error-messages="nicknameAlreadyExists"
+          label="이름"
+          prepend-inner-icon="mdi-account"
+          :readonly="loading"
+          required
+          :rules="rules.nickname"
+          @change="nicknameDuplicateCheck"
+        ></v-text-field>
+
+        <br />
+
+        <v-btn
+          block
+          color="primary"
+          :disabled="!valid"
+          :loading="loading"
+          size="large"
+          type="submit"
+          variant="elevated"
+        >
+          회원가입
+        </v-btn>
+      </v-form>
+    </v-card>
+  </v-sheet>
+</template>

@@ -4,7 +4,7 @@ import axiosInstance from '.';
 const authentication = async loginRequest => {
   const res = await axiosInstance.post('/auth/login', loginRequest);
 
-  return res.data;
+  return res;
 };
 
 // 아이디 중복확인
@@ -17,7 +17,7 @@ const checkDuplicateLoginId = async checkDuplicateRequest => {
     }
   );
 
-  return res.data;
+  return res;
 };
 
 // 닉네임 중복확인
@@ -30,7 +30,7 @@ const checkDuplicateNickname = async checkDuplicateRequest => {
     }
   );
 
-  return res.data;
+  return res;
 };
 
 // 회원가입
@@ -39,13 +39,13 @@ const signup = async signupRequest => {
     headers: { 'Content-Type': 'application/json' },
   });
 
-  return res.data;
+  return res;
 };
 
 const me = async () => {
   const res = await axiosInstance.get('/members/me');
 
-  return res.data;
+  return res;
 };
 
 export {

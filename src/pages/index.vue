@@ -1,7 +1,7 @@
-<template>
-  <HelloWorld />
-</template>
-
 <script setup>
 //
 </script>
+
+<template>
+  <BoardMain />
+</template>

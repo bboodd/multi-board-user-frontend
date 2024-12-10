@@ -1,13 +1,68 @@
+<script setup>
+import { formatDate } from '@/utils/formater';
+import { useAuthStore } from '@/stores/auth.store';
+import { storeToRefs } from 'pinia';
+import { useField, useForm } from 'vee-validate';
+import { useRoute } from 'vue-router';
+
+const MAX_COMMENT_LENGTH = 1000;
+
+const route = useRoute();
+const boardType = route.path.split('/')[1];
+
+const authStore = useAuthStore();
+const { nickname } = storeToRefs(authStore);
+
+const { commentList } = defineProps({
+  commentList: {
+    type: Array,
+    default: () => [],
+  },
+});
+
+const emit = defineEmits(['saveComment', 'deleteComment']);
+
+// 댓글 입력 가능 여부
+const canAddComment = computed(() => nickname.value && boardType !== 'qna');
+
+const { handleSubmit } = useForm({
+  validationSchema: {
+    inputComment(value) {
+      if (!value?.trim()) return '댓글을 입력해 주세요.';
+      if (value.length > MAX_COMMENT_LENGTH)
+        return `댓글은 ${MAX_COMMENT_LENGTH}자 이하여야 합니다.`;
+      return true;
+    },
+  },
+});
+
+const inputComment = useField('inputComment');
+
+const submit = handleSubmit(values => {
+  emit('saveComment', { content: values.inputComment });
+  inputComment.value.value = ''; // 입력 필드 초기화
+});
+
+const deleteClick = commentId => {
+  if (confirm('댓글을 삭제하시겠습니까?')) {
+    emit('deleteComment', commentId);
+  }
+};
+
+// 댓글 작성자 여부 확인
+const isCommentAuthor = commentNickname => nickname.value === commentNickname;
+</script>
+
 <template>
   <v-container class="pa-8 bg-grey-lighten-3" max-width="70%">
-    <form @submit.prevent="submit">
-      <v-row v-if="nickname && boardType !== 'qna'" class="">
+    <form v-if="canAddComment" @submit.prevent="submit">
+      <v-row>
         <v-col cols="12" md="12">
           <v-textarea
             v-model="inputComment.value.value"
             bg-color="white"
             class="float-left"
-            counter="1000"
+            :counter="MAX_COMMENT_LENGTH"
             :error-messages="inputComment.errorMessage.value"
             no-resize
             placeholder="댓글을 입력해 주세요."
@@ -26,8 +81,8 @@
       </v-row>
     </form>
     <v-row
-      v-for="(comment, idx) in props.commentList"
-      :key="idx"
+      v-for="comment in commentList"
+      :key="comment.id"
       class="comment-border pb-3 pt-3"
       dense
     >
@@ -38,80 +93,30 @@
         &nbsp;
         <span>{{ formatDate(comment.createdAt) }}</span>
       </v-col>
-      <v-spacer></v-spacer>
-      <v-col cols="1" md="1">
-        <span
-          v-if="nickname === comment.nickname"
-          class="clickable-delete"
-          @click="deleteClick(comment.id)"
+      <v-spacer />
+      <v-col v-if="isCommentAuthor(comment.nickname)" cols="1" md="1">
+        <span class="clickable-delete" @click="deleteClick(comment.id)"
           >삭제</span
         >
       </v-col>
-      <v-col class="text-start" cols="12" md="12"
-        ><span class="ml-1">{{ comment.content }}</span></v-col
-      >
+      <v-col class="text-start" cols="12" md="12">
+        <span class="ml-1">{{ comment.content }}</span>
+      </v-col>
     </v-row>
   </v-container>
 </template>
-
-<script setup>
-import { formatDate } from '@/utils/formater';
-import { useAuthStore } from '@/stores/auth.store';
-import { storeToRefs } from 'pinia';
-import { useField, useForm } from 'vee-validate';
-import { useRoute } from 'vue-router';
-
-const route = useRoute();
-const boardType = route.path.split('/')[1];
-
-const authStore = useAuthStore();
-const { nickname } = storeToRefs(authStore);
-
-const props = defineProps({
-  commentList: {
-    type: Array,
-    default: () => {
-      return [];
-    },
-  },
-});
-
-const emit = defineEmits(['saveComment']);
-
-const { handleSubmit } = useForm({
-  validationSchema: {
-    inputComment(value) {
-      if (value) {
-        if (value?.length < 100) return true;
-        return '댓글은 1000자 이하여야 합니다.';
-      }
-      return '댓글을 입력해 주세요.';
-    },
-  },
-});
-
-const inputComment = useField('inputComment');
-
-const submit = handleSubmit(values => {
-  const commentRequest = ref({
-    content: values.inputComment,
-  });
-  emit('saveComment', commentRequest.value);
-});
-
-const deleteClick = commentId => {
-  alert(commentId);
-};
-</script>
 
 <style scoped>
 .clickable-delete {
   cursor: pointer;
   color: black;
+  transition: color 0.3s ease;
 }
+
 .clickable-delete:hover {
   color: cornflowerblue;
 }
+
 .comment-border {
   border-bottom: dotted 1.5px;
 }

@@ -1,5 +1,5 @@
+<script setup></script>
+
 <template>
   <AccountLogin />
 </template>
-
-<script setup></script>

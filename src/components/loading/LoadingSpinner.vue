@@ -1,17 +1,24 @@
+<script setup>
+const SPINNER_SIZE = '48px';
+</script>
+
 <template>
-  <dialog open>
-    <div class="spinner"></div>
+  <dialog class="loading-dialog" open>
+    <div class="spinner" :style="{ '--square-size': SPINNER_SIZE }"></div>
   </dialog>
 </template>
 
-<script setup></script>
-
 <style scoped>
-dialog {
+.loading-dialog {
   outline: none;
   border: none;
-
   background: transparent;
+
+  /* 중앙 정렬을 위한 스타일 추가 */
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
 }
 
 .spinner {

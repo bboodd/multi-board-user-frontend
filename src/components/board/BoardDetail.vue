@@ -1,101 +1,149 @@
-<template>
-  <PostContent :file-list="fileList" :post="post" @download="download" />
-  <PostComment :comment-list="commentList" @save-comment="onSaveComment" />
-  <v-row class="pa-6">
-    <v-col>
-      <v-btn
-        class="mr-6"
-        color="indigo"
-        size="large"
-        width="100"
-        @click="listBtn"
-        >목록</v-btn
-      >
-      <v-btn
-        v-show="updateAndDeleteBtnFlag"
-        class="mr-6"
-        color="red"
-        size="large"
-        width="100"
-        @click="deleteBtn"
-        >삭제</v-btn
-      >
-      <v-btn
-        v-show="updateAndDeleteBtnFlag"
-        class="mr-6"
-        color="blue-grey"
-        size="large"
-        width="100"
-        @click="updateBtn"
-        >수정</v-btn
-      >
-    </v-col>
-  </v-row>
-</template>
-
 <script setup>
-import { downloadFile, getFileList } from '@/apis/fileService';
-import { getPost } from '@/apis/postService';
+import { downloadFile } from '@/apis/fileService';
+import { deletePost, getPost } from '@/apis/postService';
 import { getCommentList, saveComment } from '@/apis/commentService';
-import router from '@/router';
 import { useAuthStore } from '@/stores/auth.store';
 import { storeToRefs } from 'pinia';
-import { useRoute } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 
 const authStore = useAuthStore();
 const { nickname } = storeToRefs(authStore);
-
 const route = useRoute();
+const router = useRouter();
+
+// URL 관련 상수
 const postId = route.params.id;
 const boardType = route.path.split('/')[1];
 
-const post = ref({});
-const fileList = ref([]);
-const commentList = ref([]);
+// 상태 관리
+const state = ref({
+  post: {},
+  fileList: [],
+  commentList: [],
+});
 
-const listBtn = () => {
+// 게시글 데이터 로드
+const fetchPostData = async () => {
+  const response = await getPost(boardType, postId);
+  state.value = {
+    post: response.data,
+    fileList: response.data.files,
+    commentList: response.data.comments,
+  };
+};
+
+// 댓글 데이터만 새로 로드
+const fetchComments = async () => {
+  const res = await getCommentList(boardType, postId);
+  state.value.commentList = res.data;
+};
+
+// 댓글 저장
+const onSaveComment = async commentRequest => {
+  await saveComment(boardType, postId, commentRequest);
+  await fetchComments();
+};
+
+// 라우팅 핸들러
+const listBtn = () =>
   router.push({
     path: `/${boardType}`,
     query: route.query,
   });
-};
 
-const deleteBtn = () => {};
-
-const updateBtn = () => {
+const updateBtn = () =>
   router.push({
     path: `/${boardType}/write/${postId}`,
     query: route.query,
   });
+
+const deleteBtn = async () => {
+  if (!confirm('정말 삭제하시겠습니까?')) return;
+
+  await deletePost(boardType, post.id);
+  alert('삭제되었습니다.');
+  router.push(`/${boardType}`);
 };
 
-const onSaveComment = commentRequest => {
-  saveComment(boardType, postId, commentRequest).then(() => {
-    router.go(0);
-  });
-};
-
+// 파일 다운로드
 const download = (postId, fileId, originalName) => {
   downloadFile(boardType, postId, fileId, originalName);
 };
 
-/**
- * 수정 및 삭제 버튼 로그인시만 나오게 하는 변수
- */
+// 수정/삭제 버튼 표시 여부
 const updateAndDeleteBtnFlag = computed(() => {
   if (boardType === 'notice') return false;
-  return nickname.value === post.value?.nickname;
+  return nickname.value === state.value.post?.nickname;
 });
 
-onMounted(() => {
-  getPost(boardType, postId).then(res => {
-    post.value = res;
-  });
-  getFileList(boardType, postId).then(res => {
-    fileList.value = res;
-  });
-  getCommentList(boardType, postId).then(res => {
-    commentList.value = res;
-  });
-});
+onMounted(fetchPostData);
 </script>
+
+<template>
+  <div class="post-detail-container">
+    <!-- 단일 루트 엘리먼트로 감싸기 -->
+    <div class="content-section">
+      <PostContent
+        :file-list="state.fileList"
+        :post="state.post"
+        @download="download"
+      />
+    </div>
+
+    <div v-if="boardType !== 'gallery'" class="comment-section">
+      <PostComment
+        :comment-list="state.commentList"
+        @save-comment="onSaveComment"
+      />
+    </div>
+
+    <v-row class="button-section pa-6">
+      <v-col>
+        <v-btn
+          class="mr-6"
+          color="indigo"
+          size="large"
+          width="100"
+          @click="listBtn"
+        >
+          목록
+        </v-btn>
+        <template v-if="updateAndDeleteBtnFlag">
+          <v-btn
+            class="mr-6"
+            color="red"
+            size="large"
+            width="100"
+            @click="deleteBtn"
+          >
+            삭제
+          </v-btn>
+          <v-btn
+            class="mr-6"
+            color="blue-grey"
+            size="large"
+            width="100"
+            @click="updateBtn"
+          >
+            수정
+          </v-btn>
+        </template>
+      </v-col>
+    </v-row>
+  </div>
+</template>
+
+<style scoped>
+.post-detail-container {
+  width: 100%;
+}
+
+.content-section,
+.comment-section {
+  margin-bottom: 1rem;
+}
+
+.button-section {
+  margin-top: 1rem;
+}
+</style>

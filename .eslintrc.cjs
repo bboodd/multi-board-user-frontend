@@ -9,13 +9,13 @@ module.exports = {
   env: {
     node: true,
     'vue/setup-compiler-macros': true,
+    browser: true,
+    es2022: true,
   },
   extends: [
     'vuetify',
     './.eslintrc-auto-import.json',
     'plugin:vue/vue3-recommended',
-    // 'eslint:recommended',
-    // '@vue/eslint-config-airbnb',
     'plugin:prettier/recommended',
   ],
   rules: {
