@@ -3,7 +3,7 @@ import axiosInstance from '.';
 // 댓글 리스트 정보 조회
 const getCommentList = async (boardType, postId) => {
   const res = await axiosInstance.get(`/${boardType}/posts/${postId}/comments`);
-  return res.data;
+  return res;
 };
 
 // 댓글 저장
@@ -12,7 +12,7 @@ const saveComment = async (boardType, postId, comment) => {
     `/${boardType}/posts/${postId}/comments`,
     comment
   );
-  return res.data;
+  return res;
 };
 
 // 댓글 삭제
@@ -20,7 +20,7 @@ const deleteComment = async (boardType, postId, commentId) => {
   const res = await axiosInstance.deleteComment(
     `/${boardType}/posts/${postId}/comments/${commentId}`
   );
-  return res.data;
+  return res;
 };
 
 export { getCommentList, saveComment, deleteComment };

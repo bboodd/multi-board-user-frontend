@@ -1,9 +1,33 @@
+<script setup>
+import { useAuthStore } from '@/stores/auth.store';
+import router from '@/router';
+
+const authStore = useAuthStore();
+
+const loginRequest = ref({
+  loginId: '',
+  password: '',
+});
+
+const loginBtn = async () => {
+  try {
+    await authStore.login(loginRequest.value);
+  } catch (error) {
+    console.error('로그인 실패:', error);
+  }
+};
+
+const signupBtn = () => {
+  router.push({ path: '/signup' });
+};
+</script>
+
 <template>
   <v-sheet class="pa-16" rounded>
     <v-card class="mx-auto px-6 py-8" :elevation="12" max-width="40%">
       <div class="pa-10">
         <h1 class="mb-10" style="text-align: center">로그인</h1>
-        <form>
+        <form @submit.prevent="loginBtn">
           <v-text-field
             v-model="loginRequest.loginId"
             label="아이디"
@@ -23,7 +47,7 @@
             dark
             depressed
             large
-            @click="loginBtn"
+            type="submit"
           >
             로그인
           </v-btn>
@@ -42,23 +66,3 @@
     </v-card>
   </v-sheet>
 </template>
-
-<script setup>
-import { useAuthStore } from '@/stores/auth.store';
-import router from '@/router';
-
-const authStore = useAuthStore();
-
-const loginRequest = ref({
-  loginId: '',
-  password: '',
-});
-
-const loginBtn = () => {
-  authStore.login(loginRequest.value);
-};
-
-const signupBtn = () => {
-  router.push({ path: '/signup' });
-};
-</script>

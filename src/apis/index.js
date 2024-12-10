@@ -13,7 +13,8 @@ axiosInstance.interceptors.request.use(
   //     return request;
   //   },
   config => {
-    const { accessToken } = useAuthStore();
+    const authStore = useAuthStore();
+    const { accessToken } = authStore;
 
     if (accessToken) {
       config.headers.Authorization = `Bearer ${accessToken}`;
@@ -34,44 +35,47 @@ axiosInstance.interceptors.response.use(
     // - 200번대 응답은 여기서 처리
     return response;
   },
-  error => {
-    console.log('ERROR >>>', error.response.data);
-    const originalRequest = error.config;
-    const { refreshToken, updateAccessToken, logout } = useAuthStore();
+  async error => {
+    if (error.response) {
+      const originalRequest = error.config;
+      const authStore = useAuthStore();
+      const { refreshToken, updateAccessToken, logout } = authStore;
 
-    // 응답이 에러인 경우
-    // - 200번대 외의 응답은 여기서 처리
+      if (error.response.status === 401) {
+        if (refreshToken?.length) {
+          try {
+            const res = await axiosInstance.post(
+              '/token/refresh',
+              refreshToken
+            );
+            const newAccessToken = res.data?.data.accessToken;
 
-    if (error.response.status === 401) {
-      // 리프레시 토큰이 있다면
-      if (refreshToken?.length) {
-        axios
-          .post('/api/token/refresh', refreshToken)
-          .then(res => {
-            console.log(res);
-            updateAccessToken(res.data?.data.accessToken);
-            originalRequest.headers.Authorization = `Bearer ${res.data.data.accessToken}`;
-            return axiosInstance(originalRequest);
-          })
-          .catch(error => {
-            alert('다시 로그인 해 주세요.');
+            updateAccessToken(newAccessToken);
+            originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
+
+            return axiosInstance(originalRequest); // 원래 요청 재시도
+          } catch (refreshError) {
             logout();
             router.push('/');
-            return Promise.reject(error);
-          });
-      } else {
-        // 리프레시 토큰이 없다면
-        logout();
-        router.push('/');
+            throw new Error('세션이 만료되었습니다. 다시 로그인해주세요.');
+          }
+        } else {
+          logout();
+          router.push('/');
+          throw new Error('로그인이 필요합니다.');
+        }
       }
+
+      throw new Error(
+        error.response.data.message || '서버 에러가 발생했습니다.'
+      );
     }
 
-    if ([400, 404, 500].includes(error.response.status)) {
-      alert(error.response.data.message);
-      return Promise.reject(error);
+    if (error.request) {
+      throw new Error('네트워크 에러가 발생했습니다.');
     }
 
-    return Promise.reject(error);
+    throw error;
   }
 );
 

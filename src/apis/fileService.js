@@ -3,7 +3,7 @@ import axiosInstance from '.';
 // 파일 리스트 정보 조회
 const getFileList = async (boardType, postId) => {
   const res = await axiosInstance.get(`/${boardType}/posts/${postId}/files`);
-  return res.data;
+  return res;
 };
 
 // 다운로드 파일

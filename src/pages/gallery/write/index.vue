@@ -1,5 +1,5 @@
+<script setup></script>
+
 <template>
   <BoardSave />
 </template>
-
-<script setup></script>
