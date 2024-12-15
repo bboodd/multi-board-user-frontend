@@ -85,7 +85,7 @@ const thumbnailUrls = ref({});
 
 const loadThumbnail = async postId => {
   try {
-    const response = await getThumbnail('gallery', postId);
+    const response = await getThumbnail(postId);
     thumbnailUrls.value[postId] =
       response.data || 'https://cdn.vuetifyjs.com/images/parallax/material.jpg';
   } catch (error) {

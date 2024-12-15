@@ -44,7 +44,7 @@ const onUpdatePost = async formData => {
 };
 
 const download = (postId, fileId, originalName) => {
-  downloadFile(boardType, postId, fileId, originalName);
+  downloadFile(postId, fileId, originalName);
 };
 
 onMounted(fetchData);

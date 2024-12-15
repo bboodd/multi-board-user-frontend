@@ -40,7 +40,7 @@ const fetchComments = async () => {
 
 // 댓글 저장
 const onSaveComment = async commentRequest => {
-  await saveComment(boardType, postId, commentRequest);
+  await saveComment(postId, commentRequest);
   await fetchComments();
 };
 
@@ -67,7 +67,7 @@ const deleteBtn = async () => {
 
 // 파일 다운로드
 const download = (postId, fileId, originalName) => {
-  downloadFile(boardType, postId, fileId, originalName);
+  downloadFile(postId, fileId, originalName);
 };
 
 // 수정/삭제 버튼 표시 여부

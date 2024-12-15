@@ -4,7 +4,9 @@ import {
   checkDuplicateNickname,
   signup,
 } from '@/apis/memberService';
-import router from '@/router';
+import { useRouter } from 'vue-router';
+
+const router = useRouter();
 
 const valid = ref(false);
 const signupRequest = ref({
@@ -57,7 +59,7 @@ const rules = ref({
   nickname: [
     v => !!v || '별명은 필수입니다.',
     v =>
-      (v && v.length >= 4 && v.length <= 12) ||
+      (v && v.length >= 2 && v.length <= 10) ||
       '별명은 2글자 이상 10글자 이하여야 합니다.',
     v => {
       const regxp = /^[가-힣a-zA-Z0-9]{2,10}$/;

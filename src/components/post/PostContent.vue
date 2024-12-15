@@ -26,7 +26,7 @@ const loadImages = async () => {
   if (boardType === 'gallery' && post?.id && fileList.length > 0) {
     try {
       for (const file of fileList) {
-        const response = await getImage(boardType, post.id, file.id);
+        const response = await getImage(post.id, file.id);
         imgUrlList.value.push({
           src: response.data,
           originalName: file.originalName,
