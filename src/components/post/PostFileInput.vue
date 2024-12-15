@@ -40,7 +40,7 @@ const thumbnailUrls = ref({});
 // 썸네일 이미지 로드 함수
 const loadThumbnail = async fileId => {
   try {
-    const response = await getImage(boardType, postId, fileId);
+    const response = await getImage(postId, fileId);
     thumbnailUrls.value[fileId] = response.data;
   } catch (error) {
     console.error('Failed to load thumbnail:', error);

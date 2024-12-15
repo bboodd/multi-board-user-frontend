@@ -1,16 +1,16 @@
 import axiosInstance from '.';
 
 // 파일 리스트 정보 조회
-const getFileList = async (boardType, postId) => {
-  const res = await axiosInstance.get(`/${boardType}/posts/${postId}/files`);
+const getFileList = async postId => {
+  const res = await axiosInstance.get(`/posts/${postId}/files`);
   return res;
 };
 
 // 다운로드 파일
-const downloadFile = async (boardType, postId, fileId, fileOriginalName) => {
+const downloadFile = async (postId, fileId, fileOriginalName) => {
   try {
     const response = await axiosInstance.get(
-      `/${boardType}/posts/${postId}/files/${fileId}/download`,
+      `/posts/${postId}/files/${fileId}/download`,
       { responseType: 'blob' }
     );
 
@@ -29,17 +29,13 @@ const downloadFile = async (boardType, postId, fileId, fileOriginalName) => {
   }
 };
 
-const getThumbnail = async (boardType, postId) => {
-  const res = await axiosInstance.get(
-    `/${boardType}/posts/${postId}/thumbnail`
-  );
+const getThumbnail = async postId => {
+  const res = await axiosInstance.get(`/posts/${postId}/thumbnail`);
   return res;
 };
 
-const getImage = async (boardType, postId, fileId) => {
-  const res = await axiosInstance.get(
-    `/${boardType}/posts/${postId}/files/${fileId}/image`
-  );
+const getImage = async (postId, fileId) => {
+  const res = await axiosInstance.get(`/posts/${postId}/files/${fileId}/image`);
   return res;
 };
 

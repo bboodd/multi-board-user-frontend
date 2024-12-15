@@ -11,7 +11,7 @@ const boardType = route.path.split('/')[1];
 const HEADERS_CONFIG = {
   free: [
     { title: '번호', align: 'start', width: '5%', key: 'index' },
-    { title: '분류', align: 'center', width: '7.5%', key: 'categoryName' },
+    { title: '분류', align: 'start', width: '7.5%', key: 'categoryName' },
     { title: '제목', align: 'start', width: '57.5%', key: 'title' },
     { title: '조회', align: 'center', width: '10%', key: 'viewCount' },
     { title: '등록일시', align: 'center', width: '10%', key: 'createdAt' },
@@ -19,7 +19,7 @@ const HEADERS_CONFIG = {
   ],
   gallery: [
     { title: '번호', align: 'start', width: '5%', key: 'index' },
-    { title: '분류', align: 'center', width: '5%', key: 'categoryName' },
+    { title: '분류', align: 'start', width: '5%', key: 'categoryName' },
     { title: '', align: 'start', width: '60%', key: 'title' },
     { title: '조회', align: 'center', width: '10%', key: 'viewCount' },
     { title: '등록일시', align: 'center', width: '10%', key: 'createdAt' },
@@ -91,6 +91,14 @@ const postListWithIndexAndFinPosts = computed(() => {
   return finPostList.concat(postAndIndex);
 });
 
+const displayedPostList = computed(() => {
+  if (boardType !== 'notice') {
+    return postListWithIndex.value;
+  } else {
+    return postListWithIndexAndFinPosts.value;
+  }
+});
+
 const titleClick = (postId, locked, nickname) => {
   const authStore = useAuthStore();
   if (locked && nickname !== authStore.nickname) {
@@ -104,8 +112,10 @@ const thumbnailUrls = ref({});
 const loadThumbnail = async postId => {
   if (thumbnailUrls.value[postId]) return;
 
+  if (boardType !== 'gallery') return;
+
   try {
-    const response = await getThumbnail(boardType, postId);
+    const response = await getThumbnail(postId);
     thumbnailUrls.value[postId] = response.data;
   } catch (error) {
     console.error('Failed to load thumbnail:', error);
@@ -128,6 +138,10 @@ watch(
   },
   { immediate: true }
 );
+
+// const getItemClass = item => {
+//   return boardType === 'notice' && !item.index ? 'notice-no-index' : '';
+// };
 </script>
 
 <template>
@@ -136,13 +150,15 @@ watch(
       :headers="selectHeaders(boardType)"
       hide-default-footer
       item-key="index"
-      :items="
-        boardType !== 'notice'
-          ? postListWithIndex
-          : postListWithIndexAndFinPosts
-      "
+      :items="displayedPostList"
       :items-per-page="searchDto.size"
       :no-data-text="'검색된 결과가 없습니다.'"
+      :row-props="
+        row => ({
+          class:
+            boardType === 'notice' && !row.item.index ? 'notice-no-index' : '',
+        })
+      "
     >
       <template #top>
         <v-toolbar flat>
@@ -152,140 +168,113 @@ watch(
         </v-toolbar>
       </template>
 
-      <template v-if="boardType === 'free'" #item="{ item }">
-        <tr>
-          <td class="text-start">{{ item.index }}</td>
-          <td class="table-cell-padding">{{ item.categoryName }}</td>
-          <td class="text-start text-body-1">
-            <span class="clickable-title" @click="titleClick(item.id)">
-              {{ item.title }}
-              {{ item.commentCount ? `(${item.commentCount})` : '' }}
-            </span>
-            <span v-if="newFlag(item.createdAt)" class="ml-2 text-red"
-              >new</span
-            >
-            <v-icon
-              v-if="item.fileCount"
-              class="ml-1"
-              icon="mdi-paperclip"
-              size="small"
-            />
-          </td>
-          <td class="table-cell-padding">{{ item.viewCount }}</td>
-          <td>{{ formatDate(item.createdAt) }}</td>
-          <td class="table-cell-padding">{{ item.nickname }}</td>
-        </tr>
+      <template #item.index="{ item }">
+        <div class="text-start ml-1">{{ item.index }}</div>
       </template>
 
-      <template v-else-if="boardType === 'gallery'" #item="{ item }">
-        <tr>
-          <td class="text-start">{{ item.index }}</td>
-          <td class="table-cell-padding">{{ item.categoryName }}</td>
-          <td>
-            <div class="gallery-item-container">
-              <!-- 썸네일 이미지 부분 -->
-              <div class="thumbnail-wrapper">
-                <v-img
-                  v-if="thumbnailUrls[item.id]"
-                  class="thumbnail-image"
-                  contain
-                  height="158"
-                  :src="thumbnailUrls[item.id]"
-                  @click="titleClick(item.id)"
-                >
-                  <template #placeholder>
-                    <v-row
-                      align="center"
-                      class="fill-height ma-0"
-                      justify="center"
-                    >
-                      <v-progress-circular
-                        color="grey-lighten-3"
-                        indeterminate
-                      />
-                    </v-row>
-                  </template>
+      <template #item.categoryName="{ item }">
+        <div class="mr-15 pr-5">{{ item.categoryName }}</div>
+      </template>
 
-                  <div v-if="item.fileCount > 1" class="file-count-badge">
-                    +{{ item.fileCount - 1 }}
-                  </div>
-                </v-img>
-                <v-skeleton-loader
-                  v-else
-                  class="thumbnail-image"
-                  type="image"
-                />
+      <!-- 제목 커스텀 -->
+      <template #item.title="{ item }">
+        <!-- 자유게시판 -->
+        <div v-if="boardType === 'free'" class="text-start">
+          <span class="clickable-title" @click="titleClick(item.id)">
+            {{ item.title }}
+            {{ item.commentCount ? `(${item.commentCount})` : '' }}
+          </span>
+          <span v-if="newFlag(item.createdAt)" class="ml-2 text-red">new</span>
+          <v-icon
+            v-if="item.fileCount"
+            class="ml-1"
+            icon="mdi-paperclip"
+            size="small"
+          />
+        </div>
+
+        <!-- 갤러리 -->
+        <div v-else-if="boardType === 'gallery'" class="gallery-item-container">
+          <div class="thumbnail-wrapper">
+            <v-img
+              v-if="thumbnailUrls[item.id]"
+              class="thumbnail-image"
+              contain
+              height="158"
+              :src="thumbnailUrls[item.id]"
+              @click="titleClick(item.id)"
+            >
+              <template #placeholder>
+                <v-row align="center" class="fill-height ma-0" justify="center">
+                  <v-progress-circular color="grey-lighten-3" indeterminate />
+                </v-row>
+              </template>
+
+              <div v-if="item.fileCount > 1" class="file-count-badge">
+                +{{ item.fileCount - 1 }}
               </div>
+            </v-img>
+            <v-skeleton-loader v-else class="thumbnail-image" type="image" />
+          </div>
 
-              <!-- 콘텐츠 부분 -->
-              <div class="content-container" @click="titleClick(item.id)">
-                <div class="title-wrapper">
-                  <h3 class="title-text">
-                    {{ item.title }}
-                  </h3>
-                  <div class="badges">
-                    <v-chip
-                      v-if="newFlag(item.createdAt)"
-                      class="mr-2"
-                      color="red"
-                      size="x-small"
-                    >
-                      NEW
-                    </v-chip>
-                  </div>
-                </div>
-                <p class="content-preview">{{ item.content }}</p>
+          <!-- 콘텐츠 부분 -->
+          <div class="content-container" @click="titleClick(item.id)">
+            <div class="title-wrapper">
+              <h3 class="title-text">
+                {{ item.title }}
+              </h3>
+              <div class="badges">
+                <v-chip
+                  v-if="newFlag(item.createdAt)"
+                  class="mr-2"
+                  color="red"
+                  size="x-small"
+                >
+                  NEW
+                </v-chip>
               </div>
             </div>
-          </td>
-          <td class="table-cell-padding">{{ item.viewCount }}</td>
-          <td>{{ formatDate(item.createdAt) }}</td>
-          <td class="table-cell-padding">{{ item.nickname }}</td>
-        </tr>
+            <p class="content-preview">{{ item.content }}</p>
+          </div>
+        </div>
+
+        <!-- Q&A -->
+        <div v-else-if="boardType === 'qna'" class="text-start">
+          <span
+            class="clickable-title"
+            @click="titleClick(item.id, item.locked, item.nickname)"
+          >
+            {{ item.title }} ({{ item.commentCount ? '답변완료' : '미답변' }})
+          </span>
+          <span v-if="newFlag(item.createdAt)" class="ml-2 text-red">new</span>
+          <v-icon
+            v-if="item.locked"
+            class="ml-1"
+            icon="mdi-lock"
+            size="small"
+          />
+        </div>
+
+        <!-- 공지사항 -->
+        <div v-else-if="boardType === 'notice'" class="text-start">
+          <span class="clickable-title" @click="titleClick(item.id)">
+            {{ item.title }}
+          </span>
+          <span v-if="newFlag(item.createdAt)" class="ml-2 text-red">new</span>
+        </div>
       </template>
 
-      <template v-else-if="boardType === 'qna'" #item="{ item }">
-        <tr>
-          <td class="text-start">{{ item.index }}</td>
-          <td class="text-start text-body-1">
-            <span
-              class="clickable-title"
-              @click="titleClick(item.id, item.locked, item.nickname)"
-            >
-              {{ item.title }} ({{ item.commentCount ? '답변완료' : '미답변' }})
-            </span>
-            <span v-if="newFlag(item.createdAt)" class="ml-2 text-red"
-              >new</span
-            >
-            <v-icon
-              v-if="item.locked"
-              class="ml-1"
-              icon="mdi-lock"
-              size="small"
-            />
-          </td>
-          <td class="table-cell-padding">{{ item.viewCount }}</td>
-          <td>{{ formatDate(item.createdAt) }}</td>
-          <td class="table-cell-padding">{{ item.nickname }}</td>
-        </tr>
+      <template #item.viewCount="{ item }">
+        <div class="mr-5">{{ item.viewCount }}</div>
       </template>
 
-      <template v-else-if="boardType === 'notice'" #item="{ item }">
-        <tr :class="{ 'bg-pink-lighten-5': !item.index }">
-          <td class="text-start">{{ item.index }}</td>
-          <td class="table-cell-padding">{{ item.categoryName }}</td>
-          <td class="text-start text-body-1">
-            <span class="clickable-title" @click="titleClick(item.id)">
-              {{ item.title }}
-            </span>
-            <span v-if="newFlag(item.createdAt)" class="ml-2 text-red"
-              >new</span
-            >
-          </td>
-          <td class="table-cell-padding">{{ item.viewCount }}</td>
-          <td>{{ formatDate(item.createdAt) }}</td>
-          <td class="table-cell-padding">{{ item.nickname }}</td>
-        </tr>
+      <!-- 등록일시 커스텀 -->
+      <template #item.createdAt="{ item }">
+        <div class="mr-5">{{ formatDate(item.createdAt) }}</div>
+      </template>
+
+      <template #item.nickname="{ item }">
+        <div class="mr-5">{{ item.nickname }}</div>
       </template>
     </v-data-table>
   </v-sheet>
@@ -297,14 +286,11 @@ watch(
   padding-top: 8px;
 }
 
-.table-cell-padding {
-  padding-right: 35px;
-}
-
 .clickable-title {
   cursor: pointer;
   color: black;
   transition: color 0.3s ease;
+  text-align: left;
 }
 
 .clickable-title:hover {
@@ -327,12 +313,6 @@ watch(
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
-.thumbnail-container {
-  width: 250px;
-  height: 150px;
-  flex-shrink: 0;
-}
-
 .thumbnail-wrapper {
   position: relative;
   width: 280px;
@@ -353,15 +333,11 @@ watch(
   justify-content: center;
 }
 
-:deep(.v-img__img) {
-  object-fit: contain !important;
-}
-
+:deep(.v-img__img),
 :deep(.v-img__img--contain) {
   object-fit: contain !important;
 }
 
-/* hover 효과 수정 */
 .thumbnail-image:hover :deep(.v-img__img) {
   transform: scale(1.05);
   transition: transform 0.3s ease;
@@ -384,10 +360,8 @@ watch(
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  justify-content: flex-start;
   gap: 8px;
   cursor: pointer;
-  padding-left: 0;
 }
 
 .title-wrapper {
@@ -403,12 +377,6 @@ watch(
   margin: 0;
   color: #333;
   text-align: left;
-}
-
-.badges {
-  display: flex;
-  gap: 8px;
-  align-items: center;
 }
 
 .text-red {
@@ -427,5 +395,29 @@ watch(
   -webkit-box-orient: vertical;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+:deep(.v-data-table-header th) {
+  font-weight: bold !important;
+  white-space: nowrap;
+  padding: 0 16px !important;
+}
+
+:deep(.v-data-table tbody td) {
+  padding: 8px 16px !important;
+  white-space: nowrap;
+}
+
+:deep(.v-data-table tbody td:not(.text-start)) {
+  text-align: center;
+}
+
+:deep(.v-data-table tbody td:nth-child(3)) {
+  white-space: normal;
+}
+
+:deep(.notice-no-index) {
+  background-color: rgb(252, 228, 236) !important;
+  font-weight: bold;
 }
 </style>
