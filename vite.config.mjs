@@ -49,6 +49,7 @@ export default defineConfig(({ mode }) => {
         vueTemplate: true,
       }),
     ],
+    base: '/',
     define: { 'process.env': {} },
     resolve: {
       alias: {
