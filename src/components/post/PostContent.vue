@@ -1,80 +1,80 @@
 <script setup>
-import { formatDate } from '@/utils/formater';
-import { useRoute } from 'vue-router';
-import { getImage } from '@/apis/fileService';
+  import { formatDate } from '@/utils/formater';
+  import { useRoute } from 'vue-router';
+  import { getImage } from '@/apis/fileService';
 
-const route = useRoute();
-const boardType = route.path.split('/')[1];
+  const route = useRoute();
+  const boardType = route.path.split('/')[1];
 
-const { post, fileList } = defineProps({
-  post: {
-    type: Object,
-    default: () => ({}),
-  },
-  fileList: {
-    type: Array,
-    default: () => [],
-  },
-});
+  const { post, fileList } = defineProps({
+    post: {
+      type: Object,
+      default: () => ({}),
+    },
+    fileList: {
+      type: Array,
+      default: () => [],
+    },
+  });
 
-const emit = defineEmits(['download']);
+  const emit = defineEmits(['download']);
 
-const imgUrlList = ref([]);
+  const imgUrlList = ref([]);
 
-const loadImages = async () => {
-  // post.id와 fileList 모두 확인
-  if (boardType === 'gallery' && post?.id && fileList.length > 0) {
-    try {
-      for (const file of fileList) {
-        const response = await getImage(post.id, file.id);
-        imgUrlList.value.push({
-          src: response.data,
-          originalName: file.originalName,
-        });
-        // 서버 부하 방지를 위한 지연
-        await new Promise(resolve => setTimeout(resolve, 50));
+  const loadImages = async () => {
+    // post.id와 fileList 모두 확인
+    if (boardType === 'gallery' && post?.id && fileList.length > 0) {
+      try {
+        for (const file of fileList) {
+          const response = await getImage(post.id, file.id);
+          imgUrlList.value.push({
+            src: response.data,
+            originalName: file.originalName,
+          });
+          // 서버 부하 방지를 위한 지연
+          await new Promise(resolve => setTimeout(resolve, 50));
+        }
+      } catch (error) {
+        console.error('Failed to load images:', error);
       }
-    } catch (error) {
-      console.error('Failed to load images:', error);
     }
-  }
-};
+  };
 
-// fileList가 변경될 때마다 이미지 로드
-watch(
-  [() => post, () => fileList],
-  async ([newPost, newFileList]) => {
-    if (newPost?.id && newFileList?.length) {
-      imgUrlList.value = [];
-      await loadImages();
-    }
-  },
-  { immediate: true }
-);
+  // fileList가 변경될 때마다 이미지 로드
+  watch(
+    [() => post, () => fileList],
+    async ([newPost, newFileList]) => {
+      if (newPost?.id && newFileList?.length) {
+        imgUrlList.value = [];
+        await loadImages();
+      }
+    },
+    { immediate: true }
+  );
 
-const contentRowsByType = {
-  free: 13,
-  gallery: 6,
-  default: 6,
-};
+  const contentRowsByType = {
+    free: 13,
+    gallery: 6,
+    default: 6,
+  };
 
-const selectContentRows = board =>
-  contentRowsByType[board] || contentRowsByType.default;
+  const selectContentRows = board =>
+    contentRowsByType[board] || contentRowsByType.default;
 
-const downloadClick = (postId, fileId, originalName) => {
-  emit('download', postId, fileId, originalName);
-};
+  const downloadClick = (postId, fileId, originalName) => {
+    emit('download', postId, fileId, originalName);
+  };
 </script>
 
 <template>
   <v-container class="pa-16 border-md mt-10" max-width="70%">
     <v-row class="border-b-lg border-surface-variant" rows="1">
-      <v-col class="text-center" cols="1" md="1">
+      <v-col v-if="boardType !== 'qna'" class="text-start" cols="2" md="2">
         <span
           ><strong>{{ post.categoryName }}</strong></span
         >
       </v-col>
-      <v-col class="text-left" cols="6" md="6">
+      <v-col class="text-start" cols="5" md="5">
         <div>
           {{ post.title
           }}<span v-if="boardType === 'qna'" class="ml-5">{{
@@ -83,7 +83,7 @@ const downloadClick = (postId, fileId, originalName) => {
         </div>
       </v-col>
       <v-spacer></v-spacer>
-      <v-col class="text-right" cols="3" md="3">
+      <v-col class="text-right" cols="4" md="4">
         <span>{{ formatDate(post.createdAt) }}</span>
         &nbsp;
         <span>{{ post.nickname }}</span>
@@ -91,7 +91,7 @@ const downloadClick = (postId, fileId, originalName) => {
     </v-row>
     <v-row>
       <v-spacer></v-spacer>
-      <v-col class="text-right" cols="2" md="2">
+      <v-col class="text-right" cols="3" md="3">
         <span>조회수</span>
         &nbsp;:&nbsp;
         <span>{{ post.viewCount }}</span>
@@ -103,7 +103,6 @@ const downloadClick = (postId, fileId, originalName) => {
         <v-carousel-item
           v-for="(item, idx) in imgUrlList"
           :key="idx"
-          :aria-label="`이미지 ${idx + 1}: ${item.originalName}`"
           class="carousel-item"
         >
           <div class="image-container">
@@ -112,9 +111,6 @@ const downloadClick = (postId, fileId, originalName) => {
               class="gallery-image"
               :src="item.src"
             />
-          </div>
-          <div class="text-overlay">
-            {{ item.originalName }}
           </div>
         </v-carousel-item>
       </v-carousel>
@@ -152,72 +148,72 @@ const downloadClick = (postId, fileId, originalName) => {
 </template>
 
 <style scoped>
-.clickable-download {
-  cursor: pointer;
-  color: black;
-  text-decoration: underline;
-}
+  .clickable-download {
+    cursor: pointer;
+    color: black;
+    text-decoration: underline;
+  }
 
-.clickable-download:hover {
-  color: cornflowerblue;
-}
+  .clickable-download:hover {
+    color: cornflowerblue;
+  }
 
-.text-overlay {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  background: rgba(0, 0, 0, 0.5);
-  color: white;
-  padding: 8px;
-  text-align: center;
-}
+  .text-overlay {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: rgba(0, 0, 0, 0.5);
+    color: white;
+    padding: 8px;
+    text-align: center;
+  }
 
-.gallery-carousel {
-  width: 100%;
-  margin: 20px 0;
-}
+  .gallery-carousel {
+    width: 100%;
+    margin: 20px 0;
+  }
 
-.carousel-item {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
+  .carousel-item {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
 
-.image-container {
-  width: 100%;
-  height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background-color: #f5f5f5;
-}
+  .image-container {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #f5f5f5;
+  }
 
-.gallery-image {
-  max-width: 100%;
-  max-height: 100%;
-  object-fit: contain;
-  width: auto;
-  height: auto;
-}
+  .gallery-image {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+    width: auto;
+    height: auto;
+  }
 
-.text-overlay {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  background: rgba(0, 0, 0, 0.5);
-  color: white;
-  padding: 12px;
-  text-align: center;
-  font-size: 1rem;
-}
+  .text-overlay {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: rgba(0, 0, 0, 0.5);
+    color: white;
+    padding: 12px;
+    text-align: center;
+    font-size: 1rem;
+  }
 
-:deep(.v-carousel .v-btn) {
-  background-color: rgba(0, 0, 0, 0.3);
-}
+  :deep(.v-carousel .v-btn) {
+    background-color: rgba(0, 0, 0, 0.3);
+  }
 
-:deep(.v-carousel .v-btn:hover) {
-  background-color: rgba(0, 0, 0, 0.5);
-}
+  :deep(.v-carousel .v-btn:hover) {
+    background-color: rgba(0, 0, 0, 0.5);
+  }
 </style>

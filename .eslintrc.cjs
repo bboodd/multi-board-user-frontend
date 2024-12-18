@@ -20,11 +20,11 @@ module.exports = {
   ],
   rules: {
     'vue/multi-word-component-names': 'off',
-    semi: ['error', 'always'], // 세미콜론 강제 사용
+    semi: ['error', 'always'], // 세미콜론 강제 사용ㄴ
     'import/no-unresolved': 'off',
     'comma-dangle': 'off',
     'no-new': 0,
-    indent: ['error', 2],
+    'import/prefer-default-export': 'off',
     'import/extensions': 'off',
   },
 };

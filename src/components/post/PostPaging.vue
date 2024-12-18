@@ -1,29 +1,29 @@
 <script setup>
-const { searchDto, pagination } = defineProps({
-  searchDto: {
-    type: Object,
-    default: () => ({}),
-  },
-  pagination: {
-    type: Object,
-    default: () => ({}),
-  },
-});
+  const { searchDto, pagination } = defineProps({
+    searchDto: {
+      type: Object,
+      default: () => ({}),
+    },
+    pagination: {
+      type: Object,
+      default: () => ({}),
+    },
+  });
 
-const emit = defineEmits(['movePage']);
+  const emit = defineEmits(['movePage']);
 
-const page = ref(searchDto.page);
+  const page = ref(searchDto.page);
 
-watch(
-  () => searchDto.page,
-  newPage => {
-    page.value = newPage;
-  }
-);
+  watch(
+    () => searchDto.page,
+    newPage => {
+      page.value = newPage;
+    }
+  );
 
-const changePage = () => {
-  emit('movePage', page.value);
-};
+  const changePage = () => {
+    emit('movePage', page.value);
+  };
 </script>
 
 <template>
@@ -56,8 +56,8 @@ const changePage = () => {
 </template>
 
 <style scoped>
-.pagination-container {
-  text-align: center;
-  margin-top: 1rem;
-}
+  .pagination-container {
+    text-align: center;
+    margin-top: 1rem;
+  }
 </style>
