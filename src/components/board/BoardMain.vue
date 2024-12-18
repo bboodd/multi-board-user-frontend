@@ -1,114 +1,115 @@
 <script setup>
-import { useRouter } from 'vue-router';
-import { getDashboardPosts } from '@/apis/postService';
-import { getThumbnail } from '@/apis/fileService';
-import { formatDate } from '@/utils/formater';
+  import { useRouter } from 'vue-router';
+  import { getDashboardPosts } from '@/apis/postService';
+  import { getThumbnail } from '@/apis/fileService';
+  import { formatDate } from '@/utils/formater';
 
-const router = useRouter();
+  const router = useRouter();
 
-const boardPreviews = ref({
-  freePosts: [],
-  galleryPosts: [],
-  qnaPosts: [],
-  noticePosts: [],
-});
+  const boardPreviews = ref({
+    freePosts: [],
+    galleryPosts: [],
+    qnaPosts: [],
+    noticePosts: [],
+  });
 
-const loading = ref(true);
+  const loading = ref(true);
 
-const BOARD_CONFIG = {
-  notice: {
-    title: '공지사항',
-    icon: 'mdi-bullhorn',
-    color: 'blue-lighten-1',
-    dataKey: 'noticePosts',
-    path: 'notice',
-  },
-  free: {
-    title: '자유게시판',
-    icon: 'mdi-forum',
-    color: 'green-lighten-1',
-    dataKey: 'freePosts',
-    path: 'free',
-  },
-  gallery: {
-    title: '갤러리',
-    icon: 'mdi-image',
-    color: 'purple-lighten-1',
-    dataKey: 'galleryPosts',
-    path: 'gallery',
-  },
-  qna: {
-    title: 'Q&A',
-    icon: 'mdi-help-circle',
-    color: 'orange-lighten-1',
-    dataKey: 'qnaPosts',
-    path: 'qna',
-  },
-};
+  const BOARD_CONFIG = {
+    notice: {
+      title: '공지사항',
+      icon: 'mdi-bullhorn',
+      color: 'blue-lighten-1',
+      dataKey: 'noticePosts',
+      path: 'notice',
+    },
+    free: {
+      title: '자유게시판',
+      icon: 'mdi-forum',
+      color: 'green-lighten-1',
+      dataKey: 'freePosts',
+      path: 'free',
+    },
+    gallery: {
+      title: '갤러리',
+      icon: 'mdi-image',
+      color: 'purple-lighten-1',
+      dataKey: 'galleryPosts',
+      path: 'gallery',
+    },
+    qna: {
+      title: 'Q&A',
+      icon: 'mdi-help-circle',
+      color: 'orange-lighten-1',
+      dataKey: 'qnaPosts',
+      path: 'qna',
+    },
+  };
 
-const fetchDashboardPosts = async () => {
-  try {
-    loading.value = true;
-    const res = await getDashboardPosts();
+  const fetchDashboardPosts = async () => {
+    try {
+      loading.value = true;
+      const res = await getDashboardPosts();
 
-    // 응답 데이터가 있는 경우에만 할당
-    if (res) {
-      boardPreviews.value = {
-        noticePosts: res.data.noticePosts || [],
-        freePosts: res.data.freePosts || [],
-        galleryPosts: res.data.galleryPosts || [],
-        qnaPosts: res.data.qnaPosts || [],
-      };
-    }
-  } catch (error) {
-    console.error('대시보드 데이터 로딩 실패:', error);
-  } finally {
-    loading.value = false;
-  }
-};
-
-const goToBoard = boardType => {
-  router.push(`/${BOARD_CONFIG[boardType].path}`);
-};
-
-const goToPost = (boardType, postId) => {
-  router.push(`/${BOARD_CONFIG[boardType].path}/${postId}`);
-};
-
-const isNew = createdAt => {
-  const oneWeekAgo = new Date();
-  oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
-  return new Date(createdAt) > oneWeekAgo;
-};
-
-const thumbnailUrls = ref({});
-
-const loadThumbnail = async postId => {
-  try {
-    const response = await getThumbnail(postId);
-    thumbnailUrls.value[postId] =
-      response.data || 'https://cdn.vuetifyjs.com/images/parallax/material.jpg';
-  } catch (error) {
-    console.error('썸네일 로딩 실패:', error);
-    thumbnailUrls.value[postId] =
-      'https://cdn.vuetifyjs.com/images/parallax/material.jpg';
-  }
-};
-
-// 갤러리 게시글의 썸네일 로드
-watch(
-  () => boardPreviews.value.galleryPosts,
-  async newPosts => {
-    if (newPosts?.length) {
-      for (const post of newPosts) {
-        await loadThumbnail(post.id);
+      // 응답 데이터가 있는 경우에만 할당
+      if (res) {
+        boardPreviews.value = {
+          noticePosts: res.data.noticePosts || [],
+          freePosts: res.data.freePosts || [],
+          galleryPosts: res.data.galleryPosts || [],
+          qnaPosts: res.data.qnaPosts || [],
+        };
       }
+    } catch (error) {
+      console.error('대시보드 데이터 로딩 실패:', error);
+    } finally {
+      loading.value = false;
     }
-  },
-  { immediate: true }
-);
+  };
 
-onMounted(fetchDashboardPosts);
+  const goToBoard = boardType => {
+    router.push(`/${BOARD_CONFIG[boardType].path}`);
+  };
+
+  const goToPost = (boardType, postId) => {
+    router.push(`/${BOARD_CONFIG[boardType].path}/${postId}`);
+  };
+
+  const isNew = createdAt => {
+    const oneWeekAgo = new Date();
+    oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+    return new Date(createdAt) > oneWeekAgo;
+  };
+
+  const thumbnailUrls = ref({});
+
+  const loadThumbnail = async postId => {
+    try {
+      const response = await getThumbnail(postId);
+      thumbnailUrls.value[postId] =
+        response.data ||
+        'https://cdn.vuetifyjs.com/images/parallax/material.jpg';
+    } catch (error) {
+      console.error('썸네일 로딩 실패:', error);
+      thumbnailUrls.value[postId] =
+        'https://cdn.vuetifyjs.com/images/parallax/material.jpg';
+    }
+  };
+
+  // 갤러리 게시글의 썸네일 로드
+  watch(
+    () => boardPreviews.value.galleryPosts,
+    async newPosts => {
+      if (newPosts?.length) {
+        for (const post of newPosts) {
+          await loadThumbnail(post.id);
+        }
+      }
+    },
+    { immediate: true }
+  );
+
+  onMounted(fetchDashboardPosts);
 </script>
 
 <template>
@@ -277,83 +278,83 @@ onMounted(fetchDashboardPosts);
 </template>
 
 <style scoped>
-.board-main {
-  padding: 24px;
-}
+  .board-main {
+    padding: 24px;
+  }
 
-.board-preview {
-  height: 100%;
-  min-height: 400px;
-}
+  .board-preview {
+    height: 100%;
+    min-height: 400px;
+  }
 
-.preview-item {
-  cursor: pointer;
-  transition: background-color 0.2s;
-}
+  .preview-item {
+    cursor: pointer;
+    transition: background-color 0.2s;
+  }
 
-.preview-item:hover {
-  background-color: rgba(0, 0, 0, 0.04);
-}
+  .preview-item:hover {
+    background-color: rgba(0, 0, 0, 0.04);
+  }
 
-.v-card-title {
-  border-bottom: 1px solid rgba(0, 0, 0, 0.12);
-  padding: 16px;
-}
+  .v-card-title {
+    border-bottom: 1px solid rgba(0, 0, 0, 0.12);
+    padding: 16px;
+  }
 
-.v-list {
-  background: transparent;
-}
+  .v-list {
+    background: transparent;
+  }
 
-.text-truncate {
-  max-width: 200px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  display: inline-block;
-}
+  .text-truncate {
+    max-width: 200px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: inline-block;
+  }
 
-.position-relative {
-  position: relative;
-}
+  .position-relative {
+    position: relative;
+  }
 
-.file-count-chip {
-  position: absolute;
-  right: -12px;
-  bottom: -8px;
-  padding: 0 8px;
-  font-weight: bold;
-  border: 2px solid white;
-  min-width: 28px;
-  justify-content: center;
-}
+  .file-count-chip {
+    position: absolute;
+    right: -12px;
+    bottom: -8px;
+    padding: 0 8px;
+    font-weight: bold;
+    border: 2px solid white;
+    min-width: 28px;
+    justify-content: center;
+  }
 
-.text-truncate {
-  max-width: 200px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
+  .text-truncate {
+    max-width: 200px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
 
-.gallery-thumbnail {
-  position: relative;
-  overflow: visible;
-}
-.gallery-container {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-right: 12px;
-}
+  .gallery-thumbnail {
+    position: relative;
+    overflow: visible;
+  }
+  .gallery-container {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-right: 12px;
+  }
 
-.file-count {
-  background: rgba(0, 0, 0, 0.7);
-  color: white;
-  padding: 2px 6px;
-  border-radius: 4px;
-  font-size: 12px;
-  font-weight: bold;
-  min-width: 20px;
-  text-align: center;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-}
+  .file-count {
+    background: rgba(0, 0, 0, 0.7);
+    color: white;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: bold;
+    min-width: 20px;
+    text-align: center;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  }
 </style>

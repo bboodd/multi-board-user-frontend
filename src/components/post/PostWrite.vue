@@ -1,152 +1,153 @@
 <script setup>
-import { useField, useForm } from 'vee-validate';
-import _ from 'lodash';
-import { useRoute } from 'vue-router';
+  import { useField, useForm } from 'vee-validate';
+  import _ from 'lodash';
+  import { useRoute } from 'vue-router';
 
-// 상수 정의
-const VALIDATION_RULES = {
-  TITLE_MAX_LENGTH: 100,
-  CONTENT_MAX_LENGTH: 4000,
-};
+  // 상수 정의
+  const VALIDATION_RULES = {
+    TITLE_MAX_LENGTH: 100,
+    CONTENT_MAX_LENGTH: 4000,
+  };
 
-const VALIDATION_MESSAGES = {
-  CATEGORY_REQUIRED: '카테고리를 선택해 주세요.',
-  TITLE_REQUIRED: '제목을 입력해 주세요.',
-  TITLE_MAX_LENGTH: '제목은 100자 이하여야 합니다.',
-  CONTENT_REQUIRED: '내용을 입력해 주세요.',
-  CONTENT_MAX_LENGTH: '내용은 4000자 이내여야 합니다.',
-};
+  const VALIDATION_MESSAGES = {
+    CATEGORY_REQUIRED: '카테고리를 선택해 주세요.',
+    TITLE_REQUIRED: '제목을 입력해 주세요.',
+    TITLE_MAX_LENGTH: '제목은 100자 이하여야 합니다.',
+    CONTENT_REQUIRED: '내용을 입력해 주세요.',
+    CONTENT_MAX_LENGTH: '내용은 4000자 이내여야 합니다.',
+  };
 
-const route = useRoute();
-const postId = route.params.id;
-const boardType = route.path.split('/')[1];
+  const route = useRoute();
+  const postId = route.params.id;
+  const boardType = route.path.split('/')[1];
 
-const { categoryList, post, fileList } = defineProps({
-  categoryList: {
-    type: Array,
-    default: () => [],
-  },
-  post: {
-    type: Object,
-    default: () => ({}),
-  },
-  fileList: {
-    type: Array,
-    default: () => [],
-  },
-});
-
-const emit = defineEmits(['savePost', 'updatePost', 'download']);
-
-// 폼 유효성 검사 설정
-const { handleSubmit } = useForm({
-  validationSchema: {
-    category(value) {
-      if (value || boardType === 'qna') return true;
-      return VALIDATION_MESSAGES.CATEGORY_REQUIRED;
+  const { categoryList, post, fileList } = defineProps({
+    categoryList: {
+      type: Array,
+      default: () => [],
     },
-    title(value) {
-      if (!value) return VALIDATION_MESSAGES.TITLE_REQUIRED;
-      if (value.length >= VALIDATION_RULES.TITLE_MAX_LENGTH) {
-        return VALIDATION_MESSAGES.TITLE_MAX_LENGTH;
-      }
-      return true;
+    post: {
+      type: Object,
+      default: () => ({}),
     },
-    content(value) {
-      if (!value) return VALIDATION_MESSAGES.CONTENT_REQUIRED;
-      if (value.length >= VALIDATION_RULES.CONTENT_MAX_LENGTH) {
-        return VALIDATION_MESSAGES.CONTENT_MAX_LENGTH;
-      }
-      return true;
+    fileList: {
+      type: Array,
+      default: () => [],
     },
-  },
-  initialValues: {},
-});
+  });
 
-// 폼 필드 설정
-const { value: categoryField, errorMessage: categoryError } =
-  useField('category');
-const { value: titleField, errorMessage: titleError } = useField('title');
-const { value: contentField, errorMessage: contentError } = useField('content');
-const locked = ref(false);
+  const emit = defineEmits(['savePost', 'updatePost', 'download']);
 
-// 파일 관련 상태
-const files = ref([{}]);
-const removeFileIds = ref([]);
-const responseFileList = ref([]);
+  // 폼 유효성 검사 설정
+  const { handleSubmit } = useForm({
+    validationSchema: {
+      category(value) {
+        if (value || boardType === 'qna') return true;
+        return VALIDATION_MESSAGES.CATEGORY_REQUIRED;
+      },
+      title(value) {
+        if (!value) return VALIDATION_MESSAGES.TITLE_REQUIRED;
+        if (value.length >= VALIDATION_RULES.TITLE_MAX_LENGTH) {
+          return VALIDATION_MESSAGES.TITLE_MAX_LENGTH;
+        }
+        return true;
+      },
+      content(value) {
+        if (!value) return VALIDATION_MESSAGES.CONTENT_REQUIRED;
+        if (value.length >= VALIDATION_RULES.CONTENT_MAX_LENGTH) {
+          return VALIDATION_MESSAGES.CONTENT_MAX_LENGTH;
+        }
+        return true;
+      },
+    },
+    initialValues: {},
+  });
 
-// 폼 데이터 초기화
-const initializeFormData = () => {
-  if (_.isEmpty(post)) return;
+  // 폼 필드 설정
+  const { value: categoryField, errorMessage: categoryError } =
+    useField('category');
+  const { value: titleField, errorMessage: titleError } = useField('title');
+  const { value: contentField, errorMessage: contentError } =
+    useField('content');
+  const locked = ref(false);
 
-  categoryField.value = _.find(categoryList, { id: post.categoryId });
-  titleField.value = post.title;
-  contentField.value = post.content;
-  responseFileList.value = fileList;
-  locked.value = post.locked;
-};
+  // 파일 관련 상태
+  const files = ref([{}]);
+  const removeFileIds = ref([]);
+  const responseFileList = ref([]);
 
-watchEffect(initializeFormData);
+  // 폼 데이터 초기화
+  const initializeFormData = () => {
+    if (_.isEmpty(post)) return;
 
-// 폼 제출 처리
-const submit = handleSubmit(values => {
-  const formData = new FormData();
+    categoryField.value = _.find(categoryList, { id: post.categoryId });
+    titleField.value = post.title;
+    contentField.value = post.content;
+    responseFileList.value = fileList;
+    locked.value = post.locked;
+  };
 
-  if (postId) {
-    formData.append('postId', postId);
-  }
+  watchEffect(initializeFormData);
 
-  if (boardType !== 'qna' && values.category) {
-    formData.append('categoryId', values.category.id);
-  }
+  // 폼 제출 처리
+  const submit = handleSubmit(values => {
+    const formData = new FormData();
 
-  formData.append('title', values.title);
-  formData.append('content', values.content);
-
-  if (boardType === 'qna') {
-    formData.append('locked', locked.value);
-  }
-
-  files.value
-    .filter(file => file && file.size > 0)
-    .forEach(file => formData.append('files', file));
-
-  removeFileIds.value.forEach(id => formData.append('removeFileIds', id));
-
-  emit(postId ? 'updatePost' : 'savePost', formData);
-});
-
-// 파일 관련 함수들
-const fileHandlers = {
-  selectFile: (file, idx) => {
-    files.value[idx] = file;
-  },
-
-  addFile: () => {
-    files.value.push({});
-  },
-
-  removeFile: (idx, fileId) => {
-    if (fileId) {
-      if (!removeFileIds.value.includes(fileId)) {
-        removeFileIds.value.push(fileId);
-      }
-      responseFileList.value.splice(idx, 1);
-      return;
+    if (postId) {
+      formData.append('postId', postId);
     }
 
-    if (idx === 0 && files.value.length === 1) {
-      files.value = [{}];
-      return;
+    if (boardType !== 'qna' && values.category) {
+      formData.append('categoryId', values.category.id);
     }
 
-    files.value.splice(idx, 1);
-  },
+    formData.append('title', values.title);
+    formData.append('content', values.content);
 
-  downloadEmit: (postId, fileId, originalName) => {
-    emit('download', postId, fileId, originalName);
-  },
-};
+    if (boardType === 'qna') {
+      formData.append('locked', locked.value);
+    }
+
+    files.value
+      .filter(file => file && file.size > 0)
+      .forEach(file => formData.append('files', file));
+
+    removeFileIds.value.forEach(id => formData.append('removeFileIds', id));
+
+    emit(postId ? 'updatePost' : 'savePost', formData);
+  });
+
+  // 파일 관련 함수들
+  const fileHandlers = {
+    selectFile: (file, idx) => {
+      files.value[idx] = file;
+    },
+
+    addFile: () => {
+      files.value.push({});
+    },
+
+    removeFile: (idx, fileId) => {
+      if (fileId) {
+        if (!removeFileIds.value.includes(fileId)) {
+          removeFileIds.value.push(fileId);
+        }
+        responseFileList.value.splice(idx, 1);
+        return;
+      }
+
+      if (idx === 0 && files.value.length === 1) {
+        files.value = [{}];
+        return;
+      }
+
+      files.value.splice(idx, 1);
+    },
+
+    downloadEmit: (postId, fileId, originalName) => {
+      emit('download', postId, fileId, originalName);
+    },
+  };
 </script>
 
 <template>
@@ -208,7 +209,7 @@ const fileHandlers = {
         <v-col class="label-col">
           <span>비밀글</span>
         </v-col>
-        <v-col>
+        <v-col cols="10">
           <v-checkbox v-model="locked" />
         </v-col>
       </v-row>
@@ -232,37 +233,37 @@ const fileHandlers = {
 </template>
 
 <style scoped>
-.post-write-container {
-  padding: 16px;
-  max-width: 70%;
-}
+  .post-write-container {
+    padding: 16px;
+    max-width: 70%;
+  }
 
-.form-row {
-  border-bottom: 1px solid var(--v-border-color);
-  margin-bottom: 0;
-}
+  .form-row {
+    border-bottom: 1px solid var(--v-border-color);
+    margin-bottom: 0;
+  }
 
-.label-col {
-  margin-top: 16px;
-  text-align: start;
-  width: 16.666%;
-}
+  .label-col {
+    margin-top: 16px;
+    text-align: start;
+    width: 16.666%;
+  }
 
-.required-field {
-  position: relative;
-}
+  .required-field {
+    position: relative;
+  }
 
-.required-field::after {
-  content: '*';
-  color: red;
-  margin-left: 2px;
-}
+  .required-field::after {
+    content: '*';
+    color: red;
+    margin-left: 2px;
+  }
 
-.category-select {
-  width: 50%;
-}
+  .category-select {
+    width: 50%;
+  }
 
-.button-group {
-  margin-top: 16px;
-}
+  .button-group {
+    margin-top: 16px;
+  }
 </style>

@@ -1,146 +1,152 @@
 <script setup>
-import _ from 'lodash';
-import { useRoute } from 'vue-router';
-import { useAuthStore } from '@/stores/auth.store';
-import { storeToRefs } from 'pinia';
+  import _ from 'lodash';
+  import { useRoute } from 'vue-router';
+  import { useAuthStore } from '@/stores/auth.store';
+  import { storeToRefs } from 'pinia';
 
-// 상수 분리
-const RECORD_SIZE_OPTIONS = [10, 20, 30, 40, 50];
-const ORDER_BY_OPTIONS = [
-  { orderByName: '등록일시', orderBy: 'createdAt' },
-  { orderByName: '분류', orderBy: 'categoryId' },
-  { orderByName: '제목', orderBy: 'title' },
-  { orderByName: '조회수', orderBy: 'viewCount' },
-];
-const SORT_OPTIONS = [
-  { sortName: '내림차순', sortBy: 'desc' },
-  { sortName: '오름차순', sortBy: 'asc' },
-];
+  // 상수 분리
+  const RECORD_SIZE_OPTIONS = [10, 20, 30, 40, 50];
+  const ORDER_BY_OPTIONS = [
+    { orderByName: '등록일시', orderBy: 'createdAt' },
+    { orderByName: '분류', orderBy: 'categoryId' },
+    { orderByName: '제목', orderBy: 'title' },
+    { orderByName: '조회수', orderBy: 'viewCount' },
+  ];
+  const SORT_OPTIONS = [
+    { sortName: '내림차순', sortBy: 'desc' },
+    { sortName: '오름차순', sortBy: 'asc' },
+  ];
 
-const route = useRoute();
-const boardType = route.path.split('/')[1];
+  const route = useRoute();
+  const boardType = route.path.split('/')[1];
 
-const authStore = useAuthStore();
-const { nickname } = storeToRefs(authStore);
+  const authStore = useAuthStore();
+  const { nickname } = storeToRefs(authStore);
 
-const { categoryList, searchDto } = defineProps({
-  categoryList: {
-    type: Array,
-    default: () => [],
-  },
-  searchDto: {
-    type: Object,
-    default: () => ({}),
-  },
-});
+  const { categoryList, searchDto } = defineProps({
+    categoryList: {
+      type: Array,
+      default: () => [],
+    },
+    searchDto: {
+      type: Object,
+      default: () => ({}),
+    },
+  });
 
-const emit = defineEmits(['searchPost', 'emitSort']);
+  const emit = defineEmits(['searchPost', 'emitSort']);
 
-// 날짜 관련 상태
-const startDateMenu = ref(false);
-const endDateMenu = ref(false);
-const selectDate = ref({
-  startDate: searchDto.startDate ? new Date(searchDto.startDate) : null,
-  endDate: searchDto.endDate ? new Date(searchDto.endDate) : null,
-});
+  // 날짜 관련 상태
+  const startDateMenu = ref(false);
+  const endDateMenu = ref(false);
+  const selectDate = ref({
+    startDate: searchDto.startDate ? new Date(searchDto.startDate) : null,
+    endDate: searchDto.endDate ? new Date(searchDto.endDate) : null,
+  });
 
-// 검색 관련 상태
-const loading = ref(false);
-const inputKeyword = ref(searchDto.keyword);
-const selectRecordSize = ref(searchDto.size || 10);
-const selectCategory = ref();
-const selectOrderBy = ref(ORDER_BY_OPTIONS[0]);
-const selectSort = ref(SORT_OPTIONS[0]);
-const selectMyAsk = ref();
+  // 검색 관련 상태
+  const loading = ref(false);
+  const inputKeyword = ref(searchDto.keyword);
+  const selectRecordSize = ref(searchDto.size || 10);
+  const selectCategory = ref();
+  const selectOrderBy = ref(ORDER_BY_OPTIONS[0]);
+  const selectSort = ref(SORT_OPTIONS[0]);
+  const selectMyAsk = ref();
 
-// computed 속성들
-const computedCategoryList = computed(() => {
-  const list = [...categoryList];
-  list.unshift({ id: 0, name: '전체 분류' });
-  return list;
-});
+  // computed 속성들
+  const computedCategoryList = computed(() => {
+    const list = [...categoryList];
+    list.unshift({ id: 0, name: '전체 분류' });
+    return list;
+  });
 
-const maxDate = computed(() => new Date().toISOString().slice(0, 10));
+  const maxDate = computed(() => {
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = String(today.getMonth() + 1).padStart(2, '0');
+    const day = String(today.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  });
 
-const aYearAgo = computed(() => {
-  const date = new Date();
-  date.setFullYear(date.getFullYear() - 1);
-  return date;
-});
+  const aYearAgo = computed(() => {
+    const date = new Date();
+    date.setFullYear(date.getFullYear() - 1);
+    return date;
+  });
 
-// 날짜 포맷 함수
-const formatDate = dateStr => {
-  if (!dateStr) return '';
-  const date = new Date(dateStr);
-  return date
-    .toLocaleDateString('ko-KR', {
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit',
-    })
-    .replace(/\. /g, '.')
-    .slice(0, -1);
-};
+  // 날짜 포맷 함수
+  const formatDate = dateStr => {
+    if (!dateStr) return '';
+    const date = new Date(dateStr);
+    return date
+      .toLocaleDateString('ko-KR', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+      })
+      .replace(/\. /g, '.')
+      .slice(0, -1);
+  };
 
-const formattedStartDate = computed(() =>
-  formatDate(selectDate.value.startDate)
-);
-const formattedEndDate = computed(() => formatDate(selectDate.value.endDate));
+  const formattedStartDate = computed(() =>
+    formatDate(selectDate.value.startDate)
+  );
+  const formattedEndDate = computed(() => formatDate(selectDate.value.endDate));
 
-/**
- * 검색 함수
- */
-const searchBtn = async () => {
-  loading.value = true;
+  /**
+   * 검색 함수
+   */
+  const searchBtn = async () => {
+    loading.value = true;
 
-  try {
-    const searchParams = {
-      startDate: selectDate.value.startDate,
-      endDate: selectDate.value.endDate,
-      categoryId: selectCategory.value?.id,
-      keyword: inputKeyword.value,
-      page: searchDto.page,
-      size: selectRecordSize.value,
+    try {
+      const searchParams = {
+        startDate: selectDate.value.startDate,
+        endDate: selectDate.value.endDate,
+        categoryId: selectCategory.value?.id,
+        keyword: inputKeyword.value,
+        page: searchDto.page,
+        size: selectRecordSize.value,
+        orderBy: selectOrderBy.value.orderBy,
+        sortBy: selectSort.value.sortBy,
+        nickname: selectMyAsk.value,
+      };
+
+      emit('searchPost', searchParams);
+    } finally {
+      setTimeout(() => (loading.value = false), 1000);
+    }
+  };
+
+  // 정렬 변경 함수
+  const changeSort = () => {
+    if (!selectOrderBy.value || !selectSort.value) {
+      console.warn('정렬 조건이 선택되지 않았습니다.');
+      return;
+    }
+
+    emit('emitSort', {
+      size: selectRecordSize.value || 10,
       orderBy: selectOrderBy.value.orderBy,
       sortBy: selectSort.value.sortBy,
-      nickname: selectMyAsk.value,
-    };
+    });
+  };
 
-    emit('searchPost', searchParams);
-  } finally {
-    setTimeout(() => (loading.value = false), 1000);
-  }
-};
+  // props 변경 감시
+  watchEffect(() => {
+    selectCategory.value = _.find(
+      computedCategoryList.value,
+      obj => obj.id === (searchDto.categoryId || 0)
+    );
 
-// 정렬 변경 함수
-const changeSort = () => {
-  if (!selectOrderBy.value || !selectSort.value) {
-    console.warn('정렬 조건이 선택되지 않았습니다.');
-    return;
-  }
+    selectOrderBy.value =
+      _.find(ORDER_BY_OPTIONS, obj => obj.orderBy === searchDto.orderBy) ||
+      ORDER_BY_OPTIONS[0];
 
-  emit('emitSort', {
-    size: selectRecordSize.value || 10,
-    orderBy: selectOrderBy.value.orderBy,
-    sortBy: selectSort.value.sortBy,
+    selectSort.value =
+      _.find(SORT_OPTIONS, obj => obj.sortBy === searchDto.sortBy) ||
+      SORT_OPTIONS[0];
   });
-};
-
-// props 변경 감시
-watchEffect(() => {
-  selectCategory.value = _.find(
-    computedCategoryList.value,
-    obj => obj.id === (searchDto.categoryId || 0)
-  );
-
-  selectOrderBy.value =
-    _.find(ORDER_BY_OPTIONS, obj => obj.orderBy === searchDto.orderBy) ||
-    ORDER_BY_OPTIONS[0];
-
-  selectSort.value =
-    _.find(SORT_OPTIONS, obj => obj.sortBy === searchDto.sortBy) ||
-    SORT_OPTIONS[0];
-});
 </script>
 
 <template>
@@ -224,13 +230,14 @@ watchEffect(() => {
         <v-text-field
           v-model="inputKeyword"
           class="search-input"
+          density="default"
           label="제목 or 내용"
           variant="outlined"
         />
       </v-col>
 
       <!-- Search Button -->
-      <v-col cols="1" md="1">
+      <v-col>
         <v-btn
           block
           color="primary"
@@ -261,7 +268,7 @@ watchEffect(() => {
 
     <!-- Sort Options -->
     <v-row class="sort-row">
-      <v-col cols="1" md="1">
+      <v-col cols="2" md="2">
         <v-select
           v-model="selectRecordSize"
           :items="RECORD_SIZE_OPTIONS"
@@ -304,50 +311,48 @@ watchEffect(() => {
 </template>
 
 <style scoped>
-.search-container {
-  padding: 16px;
-  padding-bottom: 0;
-}
+  .search-container {
+    padding: 16px;
+    padding-bottom: 0;
+  }
 
-.search-row {
-  border: 1px solid var(--v-border-color);
-  padding: 6px 2px 0;
-}
+  .search-row {
+    border: 1px solid var(--v-border-color);
+    padding: 6px 2px 0;
+  }
 
-.date-label,
-.date-separator {
-  float: left;
-  margin-top: 18px;
-}
+  .date-label,
+  .date-separator {
+    float: left;
+    margin-top: 18px;
+  }
 
-.date-label {
-  padding-left: 10px;
-}
+  .date-label {
+    padding-left: 10px;
+  }
 
-.category-select,
-.search-input {
-  padding: 0 5px;
-}
+  .category-select,
+  .search-input {
+    padding: 0 5px;
+  }
 
-.my-inquiries {
-  margin-bottom: 5px;
-  padding-bottom: 5px;
-  margin-left: 0px;
-  padding-left: 0px;
-}
+  .my-inquiries {
+    margin-left: 0px;
+    padding-left: 0px;
+  }
 
-.my-inquiries span {
-  float: left;
-  margin-top: 8px;
-  margin-left: 20px;
-}
+  .my-inquiries span {
+    float: left;
+    margin-top: 8px;
+    margin-left: 20px;
+  }
 
-.sort-row {
-  margin-top: 16px;
-}
+  .sort-row {
+    margin-top: 16px;
+  }
 
-.records-label,
-.sort-label {
-  margin-top: 30px;
-}
+  .records-label,
+  .sort-label {
+    margin-top: 30px;
+  }
 </style>

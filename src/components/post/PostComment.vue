@@ -1,56 +1,56 @@
 <script setup>
-import { formatDate } from '@/utils/formater';
-import { useAuthStore } from '@/stores/auth.store';
-import { storeToRefs } from 'pinia';
-import { useField, useForm } from 'vee-validate';
-import { useRoute } from 'vue-router';
+  import { formatDate } from '@/utils/formater';
+  import { useAuthStore } from '@/stores/auth.store';
+  import { storeToRefs } from 'pinia';
+  import { useField, useForm } from 'vee-validate';
+  import { useRoute } from 'vue-router';
 
-const MAX_COMMENT_LENGTH = 1000;
+  const MAX_COMMENT_LENGTH = 1000;
 
-const route = useRoute();
-const boardType = route.path.split('/')[1];
+  const route = useRoute();
+  const boardType = route.path.split('/')[1];
 
-const authStore = useAuthStore();
-const { nickname } = storeToRefs(authStore);
+  const authStore = useAuthStore();
+  const { nickname } = storeToRefs(authStore);
 
-const { commentList } = defineProps({
-  commentList: {
-    type: Array,
-    default: () => [],
-  },
-});
-
-const emit = defineEmits(['saveComment', 'deleteComment']);
-
-// 댓글 입력 가능 여부
-const canAddComment = computed(() => nickname.value && boardType !== 'qna');
-
-const { handleSubmit } = useForm({
-  validationSchema: {
-    inputComment(value) {
-      if (!value?.trim()) return '댓글을 입력해 주세요.';
-      if (value.length > MAX_COMMENT_LENGTH)
-        return `댓글은 ${MAX_COMMENT_LENGTH}자 이하여야 합니다.`;
-      return true;
+  const { commentList } = defineProps({
+    commentList: {
+      type: Array,
+      default: () => [],
     },
-  },
-});
+  });
 
-const inputComment = useField('inputComment');
+  const emit = defineEmits(['saveComment', 'deleteComment']);
 
-const submit = handleSubmit(values => {
-  emit('saveComment', { content: values.inputComment });
-  inputComment.value.value = ''; // 입력 필드 초기화
-});
+  // 댓글 입력 가능 여부
+  const canAddComment = computed(() => nickname.value && boardType !== 'qna');
 
-const deleteClick = commentId => {
-  if (confirm('댓글을 삭제하시겠습니까?')) {
-    emit('deleteComment', commentId);
-  }
-};
+  const { handleSubmit } = useForm({
+    validationSchema: {
+      inputComment(value) {
+        if (!value?.trim()) return '댓글을 입력해 주세요.';
+        if (value.length > MAX_COMMENT_LENGTH)
+          return `댓글은 ${MAX_COMMENT_LENGTH}자 이하여야 합니다.`;
+        return true;
+      },
+    },
+  });
 
-// 댓글 작성자 여부 확인
-const isCommentAuthor = commentNickname => nickname.value === commentNickname;
+  const inputComment = useField('inputComment');
+
+  const submit = handleSubmit(values => {
+    emit('saveComment', { content: values.inputComment });
+    resetField(); // 초기화
+  });
+
+  const deleteClick = commentId => {
+    if (confirm('댓글을 삭제하시겠습니까?')) {
+      emit('deleteComment', commentId);
+    }
+  };
+
+  // 댓글 작성자 여부 확인
+  const isCommentAuthor = commentNickname => nickname.value === commentNickname;
 </script>
 
 <template>
@@ -68,7 +68,7 @@ const isCommentAuthor = commentNickname => nickname.value === commentNickname;
             placeholder="댓글을 입력해 주세요."
             rows="3"
             variant="outlined"
-            width="85%"
+            width="80%"
           ></v-textarea>
           <v-btn
             class="d-print-inline-block"
@@ -86,7 +86,7 @@ const isCommentAuthor = commentNickname => nickname.value === commentNickname;
       class="comment-border pb-3 pt-3"
       dense
     >
-      <v-col class="text-start" cols="4" md="4">
+      <v-col class="text-start" cols="6" md="6">
         <span
           ><strong>{{ comment.nickname }}</strong></span
         >
@@ -107,17 +107,17 @@ const isCommentAuthor = commentNickname => nickname.value === commentNickname;
 </template>
 
 <style scoped>
-.clickable-delete {
-  cursor: pointer;
-  color: black;
-  transition: color 0.3s ease;
-}
+  .clickable-delete {
+    cursor: pointer;
+    color: black;
+    transition: color 0.3s ease;
+  }
 
-.clickable-delete:hover {
-  color: cornflowerblue;
-}
+  .clickable-delete:hover {
+    color: cornflowerblue;
+  }
 
-.comment-border {
-  border-bottom: dotted 1.5px;
-}
+  .comment-border {
+    border-bottom: dotted 1.5px;
+  }
 </style>

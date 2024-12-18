@@ -3,7 +3,7 @@ import router from '@/router';
 import { useAuthStore } from '@/stores/auth.store';
 
 const axiosInstance = axios.create({
-  baseURL: `http://localhost:3000/api`,
+  baseURL: import.meta.env.VITE_BOARD_API_URL,
 });
 
 axiosInstance.interceptors.request.use(
@@ -36,6 +36,7 @@ axiosInstance.interceptors.response.use(
     return response;
   },
   async error => {
+    // console.log(error);
     if (error.response) {
       const originalRequest = error.config;
       const authStore = useAuthStore();
@@ -65,9 +66,8 @@ axiosInstance.interceptors.response.use(
           throw new Error('로그인이 필요합니다.');
         }
       }
-
       throw new Error(
-        error.response.data.message || '서버 에러가 발생했습니다.'
+        error.response.data.error?.message || '서버 에러가 발생했습니다.'
       );
     }
 
