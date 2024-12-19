@@ -1,7 +1,7 @@
 // Plugins
 import AutoImport from 'unplugin-auto-import/vite';
 import Components from 'unplugin-vue-components/vite';
-import Fonts from 'unplugin-fonts/vite';
+import Fonts from 'vite-plugin-webfont-dl';
 import Layouts from 'vite-plugin-vue-layouts';
 import Vue from '@vitejs/plugin-vue';
 import VueRouter from 'unplugin-vue-router/vite';
@@ -10,35 +10,16 @@ import Vuetify, { transformAssetUrls } from 'vite-plugin-vuetify';
 import { defineConfig } from 'vite';
 import { fileURLToPath, URL } from 'node:url';
 
-function fixFontPreloadLinks() {
+// 커스텀 플러그인 정의: 모든 폰트 preload 링크 제거
+function removeAllFontPreloads() {
   return {
-    name: 'fix-font-preload-links',
-    transformIndexHtml(html) {
-      // 1. Fix MIME types for EOT and TTF
-      html = html.replace(
-        /<link rel="preload" as="font" type="font\/eot" href="([^"]+\.eot)" crossorigin="anonymous">/g,
-        `<link rel="preload" as="font" type="application/vnd.ms-fontobject" href="$1" crossorigin="anonymous">`
-      );
-
-      html = html.replace(
-        /<link rel="preload" as="font" type="font\/ttf" href="([^"]+\.ttf)" crossorigin="anonymous">/g,
-        `<link rel="preload" as="font" type="font/ttf" href="$1" crossorigin="anonymous">`
-      );
-
-      // 2. Optionally remove EOT and TTF preloads if not needed
-      // EOT는 구형 브라우저용으로, 최신 브라우저만 지원한다면 제거 가능
-      html = html.replace(
-        /<link rel="preload" as="font" type="application\/vnd\.ms-fontobject" href="[^"]+\.eot" crossorigin="anonymous">/g,
-        ''
-      );
-
-      // TTF도 필요 없다면 제거
-      html = html.replace(
-        /<link rel="preload" as="font" type="font\/ttf" href="[^"]+\.ttf" crossorigin="anonymous">/g,
-        ''
-      );
-
-      return html;
+    name: 'remove-all-font-preloads',
+    transformIndexHtml: {
+      enforce: 'post', // 다른 변환 후에 실행되도록 설정
+      transform(html) {
+        // 모든 폰트 preload 링크 제거
+        return html.replace(/<link rel="preload" as="font"[^>]*>/g, '');
+      },
     },
   };
 }
@@ -78,7 +59,7 @@ export default defineConfig(({ mode }) => {
         },
         vueTemplate: true,
       }),
-      fixFontPreloadLinks(),
+      removeAllFontPreloads(),
     ],
     base: '/',
     define: { 'process.env': {} },
