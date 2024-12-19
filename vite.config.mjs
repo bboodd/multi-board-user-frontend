@@ -10,6 +10,39 @@ import Vuetify, { transformAssetUrls } from 'vite-plugin-vuetify';
 import { defineConfig } from 'vite';
 import { fileURLToPath, URL } from 'node:url';
 
+function fixFontPreloadLinks() {
+  return {
+    name: 'fix-font-preload-links',
+    transformIndexHtml(html) {
+      // 1. Fix MIME types for EOT and TTF
+      html = html.replace(
+        /<link rel="preload" as="font" type="font\/eot" href="([^"]+\.eot)" crossorigin="anonymous">/g,
+        `<link rel="preload" as="font" type="application/vnd.ms-fontobject" href="$1" crossorigin="anonymous">`
+      );
+
+      html = html.replace(
+        /<link rel="preload" as="font" type="font\/ttf" href="([^"]+\.ttf)" crossorigin="anonymous">/g,
+        `<link rel="preload" as="font" type="font/ttf" href="$1" crossorigin="anonymous">`
+      );
+
+      // 2. Optionally remove EOT and TTF preloads if not needed
+      // EOT는 구형 브라우저용으로, 최신 브라우저만 지원한다면 제거 가능
+      html = html.replace(
+        /<link rel="preload" as="font" type="application\/vnd\.ms-fontobject" href="[^"]+\.eot" crossorigin="anonymous">/g,
+        ''
+      );
+
+      // TTF도 필요 없다면 제거
+      html = html.replace(
+        /<link rel="preload" as="font" type="font\/ttf" href="[^"]+\.ttf" crossorigin="anonymous">/g,
+        ''
+      );
+
+      return html;
+    },
+  };
+}
+
 export default defineConfig(({ mode }) => {
   return {
     plugins: [
@@ -45,6 +78,7 @@ export default defineConfig(({ mode }) => {
         },
         vueTemplate: true,
       }),
+      fixFontPreloadLinks(),
     ],
     base: '/',
     define: { 'process.env': {} },
