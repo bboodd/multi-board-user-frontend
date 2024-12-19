@@ -20,7 +20,7 @@ module.exports = {
   ],
   rules: {
     'vue/multi-word-component-names': 'off',
-    semi: ['error', 'always'], // 세미콜론 강제 사용ㄴ
+    semi: ['error', 'always'],
     'import/no-unresolved': 'off',
     'comma-dangle': 'off',
     'no-new': 0,
