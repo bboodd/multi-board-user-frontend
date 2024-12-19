@@ -7,11 +7,9 @@ import Vue from '@vitejs/plugin-vue';
 import VueRouter from 'unplugin-vue-router/vite';
 import Vuetify, { transformAssetUrls } from 'vite-plugin-vuetify';
 
-// Utilities
 import { defineConfig } from 'vite';
 import { fileURLToPath, URL } from 'node:url';
 
-// https://vitejs.dev/config/
 export default defineConfig(({ mode }) => {
   return {
     plugins: [
@@ -23,7 +21,6 @@ export default defineConfig(({ mode }) => {
       Vue({
         template: { transformAssetUrls },
       }),
-      // https://github.com/vuetifyjs/vuetify-loader/tree/master/packages/vite-plugin#readme
       Vuetify({
         autoImport: true,
         styles: {
