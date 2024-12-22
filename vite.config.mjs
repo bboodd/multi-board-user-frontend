@@ -10,20 +10,6 @@ import Vuetify, { transformAssetUrls } from 'vite-plugin-vuetify';
 import { defineConfig } from 'vite';
 import { fileURLToPath, URL } from 'node:url';
 
-// 커스텀 플러그인 정의: 모든 폰트 preload 링크 제거
-function removeAllFontPreloads() {
-  return {
-    name: 'remove-all-font-preloads',
-    transformIndexHtml: {
-      enforce: 'post', // 다른 변환 후에 실행되도록 설정
-      transform(html) {
-        // 모든 폰트 preload 링크 제거
-        return html.replace(/<link rel="preload" as="font"[^>]*>/g, '');
-      },
-    },
-  };
-}
-
 export default defineConfig(({ mode }) => {
   return {
     plugins: [
@@ -59,7 +45,6 @@ export default defineConfig(({ mode }) => {
         },
         vueTemplate: true,
       }),
-      removeAllFontPreloads(),
     ],
     base: '/',
     define: { 'process.env': {} },

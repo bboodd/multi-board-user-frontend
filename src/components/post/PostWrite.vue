@@ -60,7 +60,11 @@
         return true;
       },
     },
-    initialValues: {},
+    initialValues: {
+      category: null,
+      title: '',
+      content: '',
+    },
   });
 
   // 폼 필드 설정
@@ -80,9 +84,11 @@
   const initializeFormData = () => {
     if (_.isEmpty(post)) return;
 
-    categoryField.value = _.find(categoryList, { id: post.categoryId });
-    titleField.value = post.title;
-    contentField.value = post.content;
+    setValues({
+      category: _.find(categoryList, { id: post.categoryId }) || null,
+      title: post.title || '',
+      content: post.content || '',
+    });
     responseFileList.value = fileList;
     locked.value = post.locked;
   };
@@ -201,6 +207,7 @@
             :no-resize="true"
             placeholder="내용을 입력해 주세요."
             rows="12"
+            :value="contentField || ''"
             variant="outlined"
           />
         </v-col>
