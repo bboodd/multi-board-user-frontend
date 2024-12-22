@@ -39,7 +39,7 @@
   const emit = defineEmits(['savePost', 'updatePost', 'download']);
 
   // 폼 유효성 검사 설정
-  const { handleSubmit, reset } = useForm({
+  const { handleSubmit, reset, setValues } = useForm({
     validationSchema: {
       category(value) {
         if (value || boardType === 'qna') return true;
@@ -47,14 +47,14 @@
       },
       title(value) {
         if (!value) return VALIDATION_MESSAGES.TITLE_REQUIRED;
-        if (value.length >= VALIDATION_RULES.TITLE_MAX_LENGTH) {
+        if (value.length > VALIDATION_RULES.TITLE_MAX_LENGTH) {
           return VALIDATION_MESSAGES.TITLE_MAX_LENGTH;
         }
         return true;
       },
       content(value) {
         if (!value) return VALIDATION_MESSAGES.CONTENT_REQUIRED;
-        if (value.length >= VALIDATION_RULES.CONTENT_MAX_LENGTH) {
+        if (value.length > VALIDATION_RULES.CONTENT_MAX_LENGTH) {
           return VALIDATION_MESSAGES.CONTENT_MAX_LENGTH;
         }
         return true;
@@ -207,7 +207,6 @@
             :no-resize="true"
             placeholder="내용을 입력해 주세요."
             rows="12"
-            :value="contentField || ''"
             variant="outlined"
           />
         </v-col>
