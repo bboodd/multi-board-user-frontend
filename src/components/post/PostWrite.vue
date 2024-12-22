@@ -39,7 +39,7 @@
   const emit = defineEmits(['savePost', 'updatePost', 'download']);
 
   // 폼 유효성 검사 설정
-  const { handleSubmit } = useForm({
+  const { handleSubmit, reset } = useForm({
     validationSchema: {
       category(value) {
         if (value || boardType === 'qna') return true;
@@ -115,7 +115,7 @@
     removeFileIds.value.forEach(id => formData.append('removeFileIds', id));
 
     emit(postId ? 'updatePost' : 'savePost', formData);
-    resetField();
+    reset();
   });
 
   // 파일 관련 함수들
