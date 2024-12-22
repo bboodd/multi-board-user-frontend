@@ -115,6 +115,7 @@
     removeFileIds.value.forEach(id => formData.append('removeFileIds', id));
 
     emit(postId ? 'updatePost' : 'savePost', formData);
+    resetField();
   });
 
   // 파일 관련 함수들
