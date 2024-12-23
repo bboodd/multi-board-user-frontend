@@ -28,9 +28,7 @@
           <v-col cols="12" lg="8">
             <router-view v-slot="{ Component }">
               <transition mode="out-in" name="fade">
-                <keep-alive>
-                  <component :is="Component" :key="$route.fullPath" />
-                </keep-alive>
+                <component :is="Component" :key="$route.fullPath" />
               </transition>
             </router-view>
           </v-col>

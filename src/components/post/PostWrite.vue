@@ -1,7 +1,7 @@
 <script setup>
   import { useField, useForm } from 'vee-validate';
   import _ from 'lodash';
-  import { useRoute } from 'vue-router';
+  import { useRoute, useRouter } from 'vue-router';
 
   // 상수 정의
   const VALIDATION_RULES = {
@@ -18,6 +18,7 @@
   };
 
   const route = useRoute();
+  const router = useRouter();
   const postId = route.params.id;
   const boardType = route.path.split('/')[1];
 
@@ -39,7 +40,7 @@
   const emit = defineEmits(['savePost', 'updatePost', 'download']);
 
   // 폼 유효성 검사 설정
-  const { handleSubmit, reset, setValues } = useForm({
+  const { handleSubmit } = useForm({
     validationSchema: {
       category(value) {
         if (value || boardType === 'qna') return true;
@@ -84,11 +85,9 @@
   const initializeFormData = () => {
     if (_.isEmpty(post)) return;
 
-    setValues({
-      category: _.find(categoryList, { id: post.categoryId }) || null,
-      title: post.title || '',
-      content: post.content || '',
-    });
+    categoryField.value = _.find(categoryList, { id: post.categoryId });
+    titleField.value = post.title;
+    contentField.value = post.content;
     responseFileList.value = fileList;
     locked.value = post.locked;
   };
@@ -96,7 +95,7 @@
   watchEffect(initializeFormData);
 
   // 폼 제출 처리
-  const submit = handleSubmit(values => {
+  const submit = handleSubmit((values, actions) => {
     const formData = new FormData();
 
     if (postId) {
@@ -121,7 +120,9 @@
     removeFileIds.value.forEach(id => formData.append('removeFileIds', id));
 
     emit(postId ? 'updatePost' : 'savePost', formData);
-    reset();
+    actions.resetForm();
+    files.value = [{}];
+    locked.value = false;
   });
 
   // 파일 관련 함수들
@@ -233,7 +234,9 @@
 
       <div class="button-group">
         <v-btn color="indigo" size="large" type="submit">등록</v-btn>
-        <v-btn class="ml-5" color="red" size="large">취소</v-btn>
+        <v-btn class="ml-5" color="red" size="large" @click="router.back()"
+          >취소</v-btn
+        >
       </div>
     </form>
   </v-container>
