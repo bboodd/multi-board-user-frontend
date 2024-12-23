@@ -70,7 +70,7 @@
   const deleteBtn = async () => {
     if (!confirm('정말 삭제하시겠습니까?')) return;
 
-    await deletePost(boardType, post.id);
+    await deletePost(boardType, postId);
     alert('삭제되었습니다.');
     router.push(`/${boardType}`);
   };
