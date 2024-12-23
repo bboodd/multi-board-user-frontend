@@ -30,20 +30,6 @@
     },
   ]);
 
-  watch(
-    () => accessToken.value,
-    async newToken => {
-      if (newToken) {
-        try {
-          await authStore.validateToken();
-        } catch (error) {
-          console.error('Failed to validate token:', error);
-        }
-      }
-    },
-    { immediate: true }
-  );
-
   onMounted(async () => {
     if (accessToken.value && !nickname.value) {
       try {
