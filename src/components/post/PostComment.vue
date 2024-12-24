@@ -1,5 +1,5 @@
 <script setup>
-  import { formatDate } from '@/utils/formater';
+  import { getTimegap } from '@/utils/formater';
   import { useAuthStore } from '@/stores/auth.store';
   import { storeToRefs } from 'pinia';
   import { useField, useForm } from 'vee-validate';
@@ -54,32 +54,8 @@
 </script>
 
 <template>
-  <v-container class="pa-8 bg-grey-lighten-3" max-width="70%">
-    <form v-if="canAddComment" @submit.prevent="submit">
-      <v-row>
-        <v-col cols="12" md="12">
-          <v-textarea
-            v-model="inputComment.value.value"
-            bg-color="white"
-            class="float-left"
-            :counter="MAX_COMMENT_LENGTH"
-            :error-messages="inputComment.errorMessage.value"
-            no-resize
-            placeholder="댓글을 입력해 주세요."
-            rows="3"
-            variant="outlined"
-            width="80%"
-          ></v-textarea>
-          <v-btn
-            class="d-print-inline-block"
-            height="100"
-            type="submit"
-            width="100"
-            >등록</v-btn
-          >
-        </v-col>
-      </v-row>
-    </form>
+  <v-container class="pa-8" max-width="auto">
+    <h2 class="text-start">댓글</h2>
     <v-row
       v-for="comment in commentList"
       :key="comment.id"
@@ -91,7 +67,7 @@
           ><strong>{{ comment.nickname }}</strong></span
         >
         &nbsp;
-        <span>{{ formatDate(comment.createdAt) }}</span>
+        <span>{{ getTimegap(comment.createdAt) }}</span>
       </v-col>
       <v-spacer />
       <v-col v-if="isCommentAuthor(comment.nickname)" cols="1" md="1">
@@ -103,6 +79,40 @@
         <span class="ml-1">{{ comment.content }}</span>
       </v-col>
     </v-row>
+    <form
+      v-if="canAddComment"
+      class="mt-5 bg-grey-lighten-3"
+      @submit.prevent="submit"
+    >
+      <v-row>
+        <v-col class="mt-3 pb-0" cols="12" md="12">
+          <v-textarea
+            v-model="inputComment.value.value"
+            bg-color="white"
+            class="comment-textarea pl-3 pr-3"
+            :counter="MAX_COMMENT_LENGTH"
+            :error-messages="inputComment.errorMessage.value"
+            no-resize
+            placeholder="댓글을 작성해 주세요."
+            rows="4"
+            variant="outlined"
+          ></v-textarea>
+        </v-col>
+      </v-row>
+      <div class="text-end">
+        <v-btn
+          class="mr-4 mb-4"
+          color="primary"
+          height="50"
+          large
+          type="submit"
+          width="85"
+        >
+          <v-icon class="mr-2 pr-0 pl-3" icon="mdi-wechat" size="30"></v-icon>
+          <span class="pl-0 pr-2 text-subtitle-1">등록</span>
+        </v-btn>
+      </div>
+    </form>
   </v-container>
 </template>
 
@@ -118,6 +128,14 @@
   }
 
   .comment-border {
-    border-bottom: dotted 1.5px;
+    border-bottom: 0.1px solid;
+  }
+
+  .relative-container {
+    position: relative;
+  }
+
+  .comment-textarea {
+    width: 100%;
   }
 </style>

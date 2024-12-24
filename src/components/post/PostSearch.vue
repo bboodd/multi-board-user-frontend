@@ -252,7 +252,7 @@
       <!-- My Inquiries Checkbox -->
       <v-col
         v-if="boardType === 'qna' && nickname"
-        class="my-inquiries"
+        class="my-inquiries pt-0 pb-0"
         cols="12"
         md="12"
       >
@@ -344,7 +344,7 @@
   .my-inquiries span {
     float: left;
     margin-top: 8px;
-    margin-left: 20px;
+    margin-left: 15px;
   }
 
   .sort-row {

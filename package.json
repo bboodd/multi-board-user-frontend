@@ -12,6 +12,7 @@
     "@mdi/font": "7.4.47",
     "core-js": "^3.37.1",
     "dayjs": "^1.11.13",
+    "dompurify": "^3.2.3",
     "esbuild": "^0.24.0",
     "roboto-fontface": "*",
     "vue": "^3.4.31",

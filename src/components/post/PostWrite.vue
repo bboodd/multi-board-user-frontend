@@ -121,8 +121,8 @@
 
     emit(postId ? 'updatePost' : 'savePost', formData);
     actions.resetForm();
-    files.value = [{}];
-    locked.value = false;
+    // files.value = [{}];
+    // locked.value = false;
   });
 
   // 파일 관련 함수들
