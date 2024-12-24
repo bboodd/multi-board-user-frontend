@@ -10,26 +10,26 @@
 
   const HEADERS_CONFIG = {
     free: [
-      { title: '번호', align: 'start', width: '7.5%', key: 'index' },
-      { title: '분류', align: 'start', width: '7.5%', key: 'categoryName' },
-      { title: '제목', align: 'start', width: '55%', key: 'title' },
+      { title: '번호', align: 'start', width: '10%', key: 'index' },
+      { title: '분류', align: 'start', width: '5%', key: 'categoryName' },
+      { title: '제목', align: 'start', width: '50%', key: 'title' },
       { title: '조회', align: 'center', width: '10%', key: 'viewCount' },
-      { title: '등록일시', align: 'center', width: '11%', key: 'createdAt' },
+      { title: '등록일시', align: 'center', width: '12%', key: 'createdAt' },
       { title: '등록자', align: 'center', width: '10%', key: 'nickname' },
     ],
     gallery: [
-      { title: '번호', align: 'start', width: '7.5%', key: 'index' },
-      { title: '분류', align: 'start', width: '7.5%', key: 'categoryName' },
-      { title: '', align: 'start', width: '55%', key: 'title' },
+      { title: '번호', align: 'start', width: '10%', key: 'index' },
+      { title: '분류', align: 'start', width: '5%', key: 'categoryName' },
+      { title: '', align: 'start', width: '50%', key: 'title' },
       { title: '조회', align: 'center', width: '10%', key: 'viewCount' },
-      { title: '등록일시', align: 'center', width: '11%', key: 'createdAt' },
+      { title: '등록일시', align: 'center', width: '12%', key: 'createdAt' },
       { title: '등록자', align: 'center', width: '10%', key: 'nickname' },
     ],
     qna: [
-      { title: '번호', align: 'start', width: '7.5%', key: 'index' },
-      { title: '제목', align: 'start', width: '62.5%', key: 'title' },
+      { title: '번호', align: 'start', width: '10%', key: 'index' },
+      { title: '제목', align: 'start', width: '60%', key: 'title' },
       { title: '조회', align: 'center', width: '10%', key: 'viewCount' },
-      { title: '등록일시', align: 'center', width: '11%', key: 'createdAt' },
+      { title: '등록일시', align: 'center', width: '12%', key: 'createdAt' },
       { title: '등록자', align: 'center', width: '10%', key: 'nickname' },
     ],
     notice: null, // free와 동일
@@ -109,18 +109,20 @@
 
   const thumbnailUrls = ref({});
 
+  const defaultImg = ref(
+    new URL(`@/assets/defaultImg.png`, import.meta.url).href
+  );
+
   const loadThumbnail = async postId => {
     if (thumbnailUrls.value[postId]) return;
 
     if (boardType !== 'gallery') return;
 
-    try {
-      const response = await getThumbnail(postId);
+    const response = await getThumbnail(postId);
+    if (!response.data) {
+      thumbnailUrls.value[postId] = defaultImg.value;
+    } else {
       thumbnailUrls.value[postId] = response.data;
-    } catch (error) {
-      console.error('Failed to load thumbnail:', error);
-      thumbnailUrls.value[postId] =
-        'https://cdn.vuetifyjs.com/images/parallax/material.jpg';
     }
   };
 
@@ -176,7 +178,10 @@
       <template #item.title="{ item }">
         <!-- 자유게시판 -->
         <div v-if="boardType === 'free'" class="text-start title-wrapper">
-          <span class="clickable-title" @click="titleClick(item.id)">
+          <span
+            class="clickable-title text-truncate"
+            @click="titleClick(item.id)"
+          >
             {{ item.title }}
             <span v-if="item.commentCount" class="comment-count"
               >({{ item.commentCount }})</span
@@ -248,7 +253,7 @@
         <!-- Q&A -->
         <div v-else-if="boardType === 'qna'" class="text-start title-wrapper">
           <span
-            class="clickable-title"
+            class="clickable-title text-truncate"
             @click="titleClick(item.id, item.locked, item.nickname)"
           >
             {{ item.title }}
@@ -279,7 +284,10 @@
           v-else-if="boardType === 'notice'"
           class="text-start title-wrapper"
         >
-          <span class="clickable-title" @click="titleClick(item.id)">
+          <span
+            class="clickable-title text-truncate"
+            @click="titleClick(item.id)"
+          >
             {{ item.title }}
           </span>
           <div class="badges">
@@ -470,5 +478,13 @@
 
   :deep(.v-toolbar-title) {
     font-size: 1.2rem !important;
+  }
+
+  .text-truncate {
+    max-width: 540px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: inline-block;
   }
 </style>
