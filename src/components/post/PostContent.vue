@@ -58,16 +58,18 @@
   };
 
   const sanitizedContent = computed(() => {
-    return DOMpurify.sanitize(post.content || '');
+    if (!post.content) return '';
+    const withLineBreaks = post.content.replace(/\n/g, '<br>');
+    return DOMpurify.sanitize(withLineBreaks || '');
   });
 </script>
 
 <template>
-  <v-container class="pa-10 mt-10" max-width="auto">
+  <v-container class="pa-10 mt-2" max-width="auto">
     <v-row class="border-b-md border-surface-variant mb-5" rows="3">
       <v-col class="text-start pb-0" cols="12" md="12">
         <div>
-          <h2 class="strong-text">{{ post.title }}</h2>
+          <h1 class="strong-text">{{ post.title }}</h1>
           <span v-if="boardType === 'qna'" class="ml-5">{{
             post.commentCount ? '(답변완료)' : '(미답변)'
           }}</span>
