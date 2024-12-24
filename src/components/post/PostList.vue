@@ -1,5 +1,5 @@
 <script setup>
-  import { formatDate } from '@/utils/formater';
+  import { getTimegap } from '@/utils/formater';
   import { useRoute } from 'vue-router';
   import { useAuthStore } from '@/stores/auth.store';
   import { getThumbnail } from '@/apis/fileService';
@@ -14,7 +14,7 @@
       { title: '분류', align: 'start', width: '7.5%', key: 'categoryName' },
       { title: '제목', align: 'start', width: '55%', key: 'title' },
       { title: '조회', align: 'center', width: '10%', key: 'viewCount' },
-      { title: '등록일시', align: 'center', width: '10%', key: 'createdAt' },
+      { title: '등록일시', align: 'center', width: '11%', key: 'createdAt' },
       { title: '등록자', align: 'center', width: '10%', key: 'nickname' },
     ],
     gallery: [
@@ -22,14 +22,14 @@
       { title: '분류', align: 'start', width: '7.5%', key: 'categoryName' },
       { title: '', align: 'start', width: '55%', key: 'title' },
       { title: '조회', align: 'center', width: '10%', key: 'viewCount' },
-      { title: '등록일시', align: 'center', width: '10%', key: 'createdAt' },
+      { title: '등록일시', align: 'center', width: '11%', key: 'createdAt' },
       { title: '등록자', align: 'center', width: '10%', key: 'nickname' },
     ],
     qna: [
       { title: '번호', align: 'start', width: '7.5%', key: 'index' },
       { title: '제목', align: 'start', width: '62.5%', key: 'title' },
       { title: '조회', align: 'center', width: '10%', key: 'viewCount' },
-      { title: '등록일시', align: 'center', width: '10%', key: 'createdAt' },
+      { title: '등록일시', align: 'center', width: '11%', key: 'createdAt' },
       { title: '등록자', align: 'center', width: '10%', key: 'nickname' },
     ],
     notice: null, // free와 동일
@@ -165,7 +165,7 @@
       </template>
 
       <template #item.index="{ item }">
-        <div class="text-start">{{ item.index || '필독' }}</div>
+        <div class="text-start">{{ item.index || '고정' }}</div>
       </template>
 
       <template #item.categoryName="{ item }">
@@ -301,7 +301,7 @@
 
       <!-- 등록일시 커스텀 -->
       <template #item.createdAt="{ item }">
-        <div class="mr-5">{{ formatDate(item.createdAt) }}</div>
+        <div class="mr-5">{{ getTimegap(item.createdAt) }}</div>
       </template>
 
       <template #item.nickname="{ item }">

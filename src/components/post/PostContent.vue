@@ -1,7 +1,8 @@
 <script setup>
-  import { formatDate } from '@/utils/formater';
+  import { getTimegap } from '@/utils/formater';
   import { useRoute } from 'vue-router';
   import { getImage } from '@/apis/fileService';
+  import DOMpurify from 'dompurify';
 
   const route = useRoute();
   const boardType = route.path.split('/')[1];
@@ -52,49 +53,46 @@
     { immediate: true }
   );
 
-  const contentRowsByType = {
-    free: 13,
-    gallery: 6,
-    default: 6,
-  };
-
-  const selectContentRows = board =>
-    contentRowsByType[board] || contentRowsByType.default;
-
   const downloadClick = (postId, fileId, originalName) => {
     emit('download', postId, fileId, originalName);
   };
+
+  const sanitizedContent = computed(() => {
+    return DOMpurify.sanitize(post.content || '');
+  });
 </script>
 
 <template>
-  <v-container class="pa-16 border-md mt-10" max-width="70%">
-    <v-row class="border-b-lg border-surface-variant" rows="1">
-      <v-col v-if="boardType !== 'qna'" class="text-start" cols="2" md="2">
-        <span
-          ><strong>{{ post.categoryName }}</strong></span
-        >
-      </v-col>
-      <v-col class="text-start" cols="5" md="5">
+  <v-container class="pa-10 mt-10" max-width="auto">
+    <v-row class="border-b-md border-surface-variant mb-5" rows="3">
+      <v-col class="text-start pb-0" cols="12" md="12">
         <div>
-          {{ post.title
-          }}<span v-if="boardType === 'qna'" class="ml-5">{{
+          <h2 class="strong-text">{{ post.title }}</h2>
+          <span v-if="boardType === 'qna'" class="ml-5">{{
             post.commentCount ? '(답변완료)' : '(미답변)'
           }}</span>
         </div>
       </v-col>
-      <v-spacer></v-spacer>
-      <v-col class="text-right" cols="4" md="4">
-        <span>{{ formatDate(post.createdAt) }}</span>
-        &nbsp;
-        <span>{{ post.nickname }}</span>
+      <v-col
+        v-if="boardType !== 'qna'"
+        class="text-start pb-0"
+        cols="12"
+        md="12"
+      >
+        <v-chip color="blue" small text-color="white">{{
+          post.categoryName
+        }}</v-chip>
       </v-col>
-    </v-row>
-    <v-row>
-      <v-spacer></v-spacer>
-      <v-col class="text-right" cols="3" md="3">
-        <span>조회수</span>
-        &nbsp;:&nbsp;
-        <span>{{ post.viewCount }}</span>
+      <v-col class="text-start mb-5" cols="12" md="12">
+        <v-chip class="text-subtitle-1" color="gray" small text-color="white">{{
+          post.nickname
+        }}</v-chip>
+        &nbsp;
+        <span class="text-subtitle-2">{{ getTimegap(post.createdAt) }}</span>
+        &nbsp;
+        <span class="text-subtitle-2">조회</span>
+        &nbsp;
+        <span class="text-subtitle-2">{{ post.viewCount }}</span>
       </v-col>
     </v-row>
 
@@ -116,16 +114,10 @@
       </v-carousel>
     </v-row>
 
-    <v-row>
+    <v-row class="mb-5">
       <v-col cols="12" md="12">
-        <v-textarea
-          :model-value="post.content"
-          :no-resize="true"
-          :readonly="true"
-          :rows="selectContentRows(boardType)"
-          variant="outlined"
-          >{{ post.content }}</v-textarea
-        >
+        <!-- eslint-disable-next-line vue/no-v-html -->
+        <div class="text-start text-h6" v-html="sanitizedContent"></div>
       </v-col>
     </v-row>
 

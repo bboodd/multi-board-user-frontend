@@ -214,7 +214,7 @@
           variant="outlined"
           width="50%"
         ></v-text-field>
-        <button class="file-select" @click="selectFileBtn">파일 선택</button>
+        <button class="file-select" @click="selectFileBtn">파일선택</button>
         <input
           v-if="boardType === 'gallery'"
           accept=".jpg, .gif, .png, .jpeg"
