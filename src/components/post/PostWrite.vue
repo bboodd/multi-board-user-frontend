@@ -5,14 +5,14 @@
 
   // 상수 정의
   const VALIDATION_RULES = {
-    TITLE_MAX_LENGTH: 100,
+    TITLE_MAX_LENGTH: 50,
     CONTENT_MAX_LENGTH: 4000,
   };
 
   const VALIDATION_MESSAGES = {
     CATEGORY_REQUIRED: '카테고리를 선택해 주세요.',
     TITLE_REQUIRED: '제목을 입력해 주세요.',
-    TITLE_MAX_LENGTH: '제목은 100자 이하여야 합니다.',
+    TITLE_MAX_LENGTH: '제목은 50자 이하여야 합니다.',
     CONTENT_REQUIRED: '내용을 입력해 주세요.',
     CONTENT_MAX_LENGTH: '내용은 4000자 이내여야 합니다.',
   };
