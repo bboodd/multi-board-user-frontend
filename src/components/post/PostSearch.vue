@@ -268,12 +268,13 @@
 
     <!-- Sort Options -->
     <v-row class="sort-row">
-      <v-col cols="2" md="2">
+      <v-col cols="1" md="1">
         <v-select
           v-model="selectRecordSize"
           :items="RECORD_SIZE_OPTIONS"
           label="페이지 당"
           variant="outlined"
+          width="85"
           @update:model-value="changeSort"
         />
       </v-col>
@@ -282,7 +283,7 @@
       <v-spacer />
 
       <span class="sort-label">정렬</span>
-      <v-col cols="2" md="2">
+      <v-col class="mr-10" cols="1" md="1">
         <v-select
           v-model="selectOrderBy"
           item-title="orderByName"
@@ -291,10 +292,11 @@
           label="기준"
           return-object
           variant="outlined"
+          width="120"
           @update:model-value="changeSort"
         />
       </v-col>
-      <v-col cols="2" md="2">
+      <v-col class="mr-10" cols="1" md="1">
         <v-select
           v-model="selectSort"
           item-title="sortName"
@@ -303,6 +305,7 @@
           label="방법"
           return-object
           variant="outlined"
+          width="120"
           @update:model-value="changeSort"
         />
       </v-col>

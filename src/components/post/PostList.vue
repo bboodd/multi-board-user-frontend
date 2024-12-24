@@ -178,7 +178,7 @@
       <template #item.title="{ item }">
         <!-- 자유게시판 -->
         <div v-if="boardType === 'free'" class="text-start title-wrapper">
-          <span
+          <h2
             class="clickable-title text-truncate"
             @click="titleClick(item.id)"
           >
@@ -186,7 +186,7 @@
             <span v-if="item.commentCount" class="comment-count"
               >({{ item.commentCount }})</span
             >
-          </span>
+          </h2>
           <div class="badges">
             <v-chip
               v-if="newFlag(item.createdAt)"
