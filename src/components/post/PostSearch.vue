@@ -278,7 +278,7 @@
           @update:model-value="changeSort"
         />
       </v-col>
-      <span class="records-label">개씩 보기</span>
+      <span class="ml-2 records-label">개씩 보기</span>
 
       <v-spacer />
 
