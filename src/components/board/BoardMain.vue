@@ -83,16 +83,16 @@
 
   const thumbnailUrls = ref({});
 
+  const defaultImg = ref(
+    new URL(`@/assets/defaultImg.png`, import.meta.url).href
+  );
+
   const loadThumbnail = async postId => {
-    try {
-      const response = await getThumbnail(postId);
-      thumbnailUrls.value[postId] =
-        response.data ||
-        'https://cdn.vuetifyjs.com/images/parallax/material.jpg';
-    } catch (error) {
-      console.error('썸네일 로딩 실패:', error);
-      thumbnailUrls.value[postId] =
-        'https://cdn.vuetifyjs.com/images/parallax/material.jpg';
+    const response = await getThumbnail(postId);
+    if (!response.data) {
+      thumbnailUrls.value[postId] = defaultImg.value;
+    } else {
+      thumbnailUrls.value[postId] = response.data;
     }
   };
 
@@ -195,10 +195,7 @@
                           <v-img
                             cover
                             :loading="!thumbnailUrls[post.id]"
-                            :src="
-                              thumbnailUrls[post.id] ||
-                              'https://cdn.vuetifyjs.com/images/parallax/material.jpg'
-                            "
+                            :src="thumbnailUrls[post.id]"
                           >
                             <template #placeholder>
                               <v-progress-circular indeterminate />
