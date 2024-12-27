@@ -40,7 +40,6 @@
 
   const submit = handleSubmit(values => {
     emit('saveComment', { content: values.inputComment });
-    resetField(); // 초기화
   });
 
   const deleteClick = commentId => {
